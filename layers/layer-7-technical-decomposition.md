@@ -860,6 +860,7 @@ Profile Store (SQLite):
   +-- Layout state -> сериализуется в SQLite
   +-- App states -> сериализуются в CRDT
   +-- CPU = 0 для всех процессов профиля
+  +-- SharedArrayBuffer region профиля -> zeroize + unmap (изоляция от других профилей)
   |
   v
 Фоновые данные (background):
@@ -899,6 +900,92 @@ Profile Store (SQLite):
 ```
 
 **Где:** Level 1 (Micro-Kernel).
+
+---
+
+### 8.4 Мультипользовательская аутентификация и изоляция
+
+**Device key — один на устройство:**
+
+- Генерируется при первом запуске CORE OS. Хранится в TPM/Secure Enclave (или зашифрован в keychain при отсутствии TPM).
+- Назначение: WireGuard handshake, device authentication при подключении к Бэку, шифрование profile keys.
+- Не привязан к пользователю. При краже устройства — device key не даёт доступа к данным профилей без дополнительных секретов.
+
+**Profile key — один на профиль:**
+
+- Источник: BIP-39 recovery phrase (24 слова) → BLAKE3 → 256-bit profile key.
+- Хранение: `encrypted_profile_key = AES-256-GCM(profile_key, device_key || user_secret)`.
+  - `user_secret`: biometric template (TPM-backed) или PIN-код.
+  - При уровне «Базовый»: `user_secret` пустой, шифрование только device key.
+- Локация: OS keychain (Windows DPAPI, macOS Keychain, Linux libsecret/Keyring).
+- Назначение: расшифровка локального state профиля (VFS metadata, CRDT snapshot, app-scoped SQLite), подпись запросов на session token.
+
+**Как пользователь входит в свой профиль:**
+
+1. На экране входа — список профилей устройства («Папа», «Мама», «Анонимный»).
+2. Выбор профиля → если уровень безопасности «Повышенный» или «Максимальный» — запрос биометрии/PIN.
+3. Key Manager расшифровывает profile key: `decrypt(encrypted_profile_key, device_key + биометрия/PIN)`.
+4. Фронт запрашивает у Бэка session token для этого профиля. Запрос подписан profile key + device key.
+5. Бэк проверяет: device key известен? profile key валиден для данного profile_id? → выдаёт session token.
+6. Фронт загружает layout, проекты, приложения профиля.
+
+**Session token:**
+
+- Формат: JWT-подобный, подписан Ed25519 приватным ключом Бэка.
+- Payload: `profile_id`, `device_key_fingerprint` (BLAKE3 публичного ключа), `issued_at`, `expires_at` (default 24h).
+- Передача: в заголовке каждого API-запроса (`X-Core-Session`).
+- Валидация на Бэке: подпись валидна? `device_key_fingerprint` известен? `profile_id` существует? token не в revoke-листе?
+- При переключении профиля: старый token сбрасывается (discard на Фронте), новый запрашивается после загрузки профиля.
+
+**Как Бэк различает профили:**
+
+- Каждый профиль — отдельный session token. Бэк хранит Profile Store: каждый профиль изолирован (свой VFS, app-scoped SQLite, CRDT-журнал, аудит-лог).
+- Запрос от Фронта всегда содержит session token. Бэк не отдаст данные чужого профиля, даже если запрос пришёл с того же device key.
+- Device key = «это доверенное устройство». Session token = «это конкретный пользователь на этом устройстве».
+
+**Device key mapping:**
+
+- TPM/Secure Enclave: один root device key на устройство. Не покидает железо.
+- Key Manager: для каждого профиля derived encryption key (из recovery-фразы профиля).
+- Profile key зашифрован на устройстве. При краже устройства без биометрии/PIN profile key недоступен.
+- При уровне «Базовый»: device key открывает канал, но profile key тоже зашифрован только device key. Риск: если TPM взломан — данные профилей доступны.
+
+**Profile Store изоляция на Бэке:**
+
+- `profiles` таблица (SQLite Бэка): `id`, `name`, `device_id`, `recovery_hash`, `created_at`.
+- Per-profile данные:
+  - VFS: отдельная директория `/vfs/profiles/{profile_id}/`
+  - App-scoped data: `/vfs/apps/{app_id}/profiles/{profile_id}/`
+  - CRDT-журнал: отдельный Merkle Search Tree per profile
+  - Аудит-лог: отдельная таблица `audit_log_{profile_id}`
+- Бэк использует `profile_id` из session token для маршрутизации всех запросов. Запрос без валидного token → 401.
+
+**Переключение профилей (detailed flow):**
+
+1. **Триггер:** Пользователь выбирает профиль в UI (Display Server показывает список профилей с аватарами).
+2. **Freeze текущего:** Profile Manager вызывает `FreezeProfile(current_profile_id)`:
+   - V8 Isolates → `TerminateExecution()` (§8.2).
+   - Layout state → сериализуется в SQLite.
+   - App states → сериализуются в CRDT.
+   - Clipboard → clear().
+   - SharedArrayBuffer region текущего профиля → zeroize + unmap.
+3. **Аутентификация нового:** Profile Manager вызывает `LoadProfile(target_profile_id)`:
+   - Если уровень безопасности > «Базовый»: запрос биометрии/PIN через Host Shim → OS biometric API.
+   - Key Manager: `profile_key = decrypt(encrypted_profile_key, device_key + user_secret)`.
+   - Локальный state профиля расшифровывается: VFS metadata, CRDT snapshot из SQLite.
+4. **Session handshake:** Фронт отправляет Бэку `SessionRequest`:
+   - Подпись: `sign(profile_key + timestamp, device_key)` (Ed25519).
+   - Payload: `profile_id`, `device_key_fingerprint`, `timestamp`.
+   - Бэк валидирует подпись, проверяет `recovery_hash` профиля, выдаёт session token.
+5. **Загрузка state:** Profile Manager загружает проекты, приложения, layout. Display Server рендерит.
+6. **Время переключения:** цель < 500ms (биометрия может добавить 200–400ms).
+
+**Security considerations:**
+
+- **Cold boot attack:** master key в RAM при активном профиле. При lock/switch — profile key выгружается из RAM (explicit zeroize).
+- **Side-channel:** SharedArrayBuffer изолируется per-profile (новый region при каждом переключении).
+- **Brute-force PIN:** rate limiting на биометрию/PIN через OS API. После N неудач — профиль блокируется, требуется recovery-фраза.
+- **Revocation:** Owner может отозвать профиль с устройства через Бэк. При следующем переключении — Profile Manager получает `ProfileRevoked`, локальные данные профиля шифруются и помечаются для удаления.
 
 ---
 
