@@ -1,6 +1,6 @@
-﻿# Layer 4 — Техническая декомпозиция
+﻿# Layer 7 — Technical decomposition | Техническая декомпозиция
 
-Как каждый сценарий из Layer 1 и Layer 2 реализуется технически. Какие подсистемы участвуют, как данные текут между ними, на каком уровне архитектуры каждая живёт. Сценарии установки описаны в [Layer: Установка](layer-installation-scenarios.md). Взаимодействие с носителями — в [Layer Storage](layer-storage.md). Сетевые подключения — в [Layer Network](layer-network.md).
+Как каждый сценарий из Layer 1 и Layer 2 реализуется технически. Какие подсистемы участвуют, как данные текут между ними, на каком уровне архитектуры каждая живёт. Сценарии установки описаны в [Layer: Установка](layer-installation-scenarios.md). Взаимодействие с устройствами и носителями — в [Layer Devices](layer-devices.md).
 
 Ссылки: [architecture.md](../project/architecture.md), [tech-stack.md](../project/tech-stack.md), [ui-framework.md](../project/ui-framework.md), [filesystem.md](../project/filesystem.md), [ai-layer.md](../project/ai-layer.md).
 
