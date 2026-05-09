@@ -1,6 +1,6 @@
 ﻿# Layer 7 — Technical decomposition | Техническая декомпозиция
 
-Как каждый сценарий из Layer 1 и Layer 2 реализуется технически. Какие подсистемы участвуют, как данные текут между ними, на каком уровне архитектуры каждая живёт. Сценарии установки описаны в [Layer: Установка](layer-installation-scenarios.md). Взаимодействие с устройствами и носителями — в [Layer Devices](layer-devices.md).
+Как каждый сценарий из Layer 1 и Layer 2 реализуется технически. Какие подсистемы участвуют, как данные текут между ними, на каком уровне архитектуры каждая живёт. Сценарии установки описаны в [Layer: Установка](layer-3-installation-scenarios.md). Взаимодействие с устройствами и носителями — в [Layer Devices](layer-4-devices.md).
 
 Ссылки: [architecture.md](../project/architecture.md), [tech-stack.md](../project/tech-stack.md), [ui-framework.md](../project/ui-framework.md), [filesystem.md](../project/filesystem.md), [ai-layer.md](../project/ai-layer.md).
 
@@ -421,7 +421,7 @@ Window Manager -> размещает Island как обычное окно в п
 
 ## 4. App Runtime
 
-Модель приложений — 5 уровней интеграции: от «набрал URL» до «полный натив на WebGPU». Манифест `core.json`, app-scoped SQLite, `@core/*` API, App Registry, безопасность — подробно в [Layer Apps](layer-apps.md).
+Модель приложений — 5 уровней интеграции: от «набрал URL» до «полный натив на WebGPU». Манифест `core.json`, app-scoped SQLite, `@core/*` API, App Registry, безопасность — подробно в [Layer Apps](layer-5-apps.md).
 
 ### 4.1 V8 Isolates
 
@@ -458,7 +458,7 @@ App Runtime (Level 1)
 
 ### 4.2 App Registry
 
-**Что:** Реестр всех доступных приложений. Установка = адрес. Модель приложений (5 уровней, манифест, хранение, магазин) — в [Layer Apps, секция App Registry](layer-apps.md).
+**Что:** Реестр всех доступных приложений. Установка = адрес. Модель приложений (5 уровней, манифест, хранение, магазин) — в [Layer Apps, секция App Registry](layer-5-apps.md).
 
 **Как:**
 
@@ -1014,7 +1014,7 @@ Session Handoff:
 
 ## 10. Security Layer
 
-Безопасность — кросс-слойная тема, подробно описана в [Layer Security](layer-security.md).
+Безопасность — кросс-слойная тема, подробно описана в [Layer Security](layer-6-security.md).
 
 **Что реализовано на уровне подсистем:**
 
@@ -1028,7 +1028,7 @@ Session Handoff:
 | User Directory | Level 1 | Local/LDAP/OAuth/Custom провайдеры |
 | Capability Security | Level 1 | Контекст приложения с разрешениями (fs, network, graphics, mind, contacts) |
 
-Подробно: аутентификация, шифрование, алгоритмы, RBAC, аудит, User Directory, изоляция, векторы атак — в [Layer Security](layer-security.md).
+Подробно: аутентификация, шифрование, алгоритмы, RBAC, аудит, User Directory, изоляция, векторы атак — в [Layer Security](layer-6-security.md).
 
 ---
 
@@ -1300,7 +1300,7 @@ Clipboard Manager (Level 1):
 
 Управление: контекстное меню (Level 3), Command Bar (Level 1 + Level 4), Core.Hardcore (CLI).
 
-Подробно: роли, наследование, группы, техническая реализация — в [Layer Security, секция 3](layer-security.md).
+Подробно: роли, наследование, группы, техническая реализация — в [Layer Security, секция 3](layer-6-security.md).
 
 ---
 
@@ -1310,7 +1310,7 @@ Clipboard Manager (Level 1):
 
 Просмотр: Core.Hardcore (CLI), Command Bar (Intent Parser), контекстное меню (история доступа).
 
-Подробно: 13 категорий, настройки, JSON-конфиг, техническая реализация — в [Layer Security, секция 4](layer-security.md).
+Подробно: 13 категорий, настройки, JSON-конфиг, техническая реализация — в [Layer Security, секция 4](layer-6-security.md).
 
 ---
 
@@ -1322,7 +1322,7 @@ Clipboard Manager (Level 1):
 
 **Где:** Level 1 (Micro-Kernel, UserDirectory interface + implementations).
 
-Подробно: провайдеры, настройка, техническая реализация — в [Layer Security, секция 5](layer-security.md).
+Подробно: провайдеры, настройка, техническая реализация — в [Layer Security, секция 5](layer-6-security.md).
 
 ### 16.2 Профили Бэка (Backoffice Profiles)
 
@@ -1444,7 +1444,7 @@ Component Manager (Level 1):
 | Профили — анонимный | RAM-only Storage | Level 1 |
 | Синхронизация | Sync Engine (CRDT) | Level 2 |
 | Устройства — один экран | Session Handoff | Level 1 + Level 2 + Level 3 |
-| Безопасность — ключи, прокси, шифрование, аутентификация | → [Layer Security](layer-security.md) | Level 0 + Level 1 + Level 2 |
+| Безопасность — ключи, прокси, шифрование, аутентификация | → [Layer Security](layer-6-security.md) | Level 0 + Level 1 + Level 2 |
 | Space — размещение | Space Manager | Level 0 + Level 3 |
 | Space — состояния | Space Manager (state machine) | Level 1 + Level 2 |
 | Space — визуальное отличие | Space Manager (bg + метка) | Level 1 + Level 3 |
@@ -1453,7 +1453,7 @@ Component Manager (Level 1):
 | Уведомления | Notification Manager (единый поток, приоритеты) | Level 1 + Level 2 + Level 3 |
 | Буфер обмена | Clipboard Manager (мультибуфер, политики) | Level 1 + Level 2 + Level 3 |
 | Копирование между Space | P2P direct transfer (Бэк-контролируемая) | Level 2 |
-| Роли и права, Аудит, User Directory | → [Layer Security](layer-security.md) | Level 1 |
+| Роли и права, Аудит, User Directory | → [Layer Security](layer-6-security.md) | Level 1 |
 | Профили Бэка | Component Manager (ядро + опциональные) | Level 1 |
 | Носители — импорт/экспорт | Storage Manager (Import/Export Engine, Dedup) | Level 0 + Level 1 + Level 3 |
 

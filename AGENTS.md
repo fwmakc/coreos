@@ -17,13 +17,13 @@ os/
 │   ├── gazprom.md               # Промышленный кейс (Газпром)
 │   └── gorynych.md              # Консорциум Яндекс/Сбер/ВК
 ├── layers/                      # Слои проектирования (сверху вниз)
-│   ├── layer-user-experience.md          # UX + Space: что видит пользователь
-│   ├── layer-system-split.md             # Фронт (Shell) и Бэк (Backoffice)
-│   ├── layer-installation-scenarios.md   # Сценарии установки и эксплуатации
-│   ├── layer-technical-decomposition.md  # Подсистемы: техническая декомпозиция
-│   ├── layer-security.md                 # Безопасность: единый кросс-слойный документ
-│   ├── layer-devices.md                  # Устройства и носители: USB, диски, сеть, P2P, принтеры
-│   ├── layer-apps.md                     # Модель приложений: 5 уровней интеграции
+│   ├── layer-1-user-experience.md          # UX + Space: что видит пользователь
+│   ├── layer-2-system-split.md             # Фронт (Shell) и Бэк (Backoffice)
+│   ├── layer-3-installation-scenarios.md   # Сценарии установки и эксплуатации
+│   ├── layer-7-technical-decomposition.md  # Подсистемы: техническая декомпозиция
+│   ├── layer-6-security.md                 # Безопасность: единый кросс-слойный документ
+│   ├── layer-4-devices.md                  # Устройства и носители: USB, диски, сеть, P2P, принтеры
+│   ├── layer-5-apps.md                     # Модель приложений: 5 уровней интеграции
 │   └── layers-review.md                  # Анализ слоёв: противоречия, дублирование, пробелы
 ├── project/                     # Проектная документация
 │   ├── vision.md                # Видение и философия

@@ -1242,7 +1242,7 @@ if (process.env.CORE_OS === 'true') {
 
 | Слой | Что описано |
 |------|-------------|
-| [Layer: UX](layer-user-experience.md) | Приложения — без установки, живут внутри проектов |
-| [Layer: Фронт/Бэк](layer-system-split.md) | V8 Isolates, Island Mode, App Registry как компоненты |
-| [Layer: Подсистемы](layer-technical-decomposition.md) | App Runtime, App Registry, Capability Security — технически |
-| [Layer: Безопасность](layer-security.md) | Capability model, permissions, sandboxing по уровням приложений |
+| [Layer: UX](layer-1-user-experience.md) | Приложения — без установки, живут внутри проектов |
+| [Layer: Фронт/Бэк](layer-2-system-split.md) | V8 Isolates, Island Mode, App Registry как компоненты |
+| [Layer: Подсистемы](layer-7-technical-decomposition.md) | App Runtime, App Registry, Capability Security — технически |
+| [Layer: Безопасность](layer-6-security.md) | Capability model, permissions, sandboxing по уровням приложений |
