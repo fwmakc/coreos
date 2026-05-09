@@ -527,6 +527,33 @@ const context = {
 
 **Где:** Level 1 (Micro-Kernel, Capability Security).
 
+### 4.5 Permissions UI
+
+**Что:** Интерфейс для просмотра и управления разрешениями приложений. Пользователь видит, какие capabilities выданы каждому приложению, и может их отозвать.
+
+**Как:**
+
+```
+Permissions UI (Level 3, Display Server):
+  |
+  +-- Список приложений (Command Bar / контекстное меню окна)
+  +-- Для каждого приложения:
+      +-- capabilities: fs, network, graphics, mind, contacts, notifications, microphone, camera
+      +-- toggle: разрешено / запрещено
+      +-- fs: детализация — какие папки/файлы (scope)
+      +-- network: детализация — какие домены (whitelist)
+
+Запрос нового разрешения:
+  |
+  +-- Приложение вызывает API, которого нет в его capability-контексте
+  +-- Micro-Kernel (Level 1) перехватывает → отправляет запрос в Permissions UI
+  +-- Display Server показывает модальное окно с запросом
+  +-- Пользователь: "Разрешить" / "Запретить" / "Разрешить один раз"
+  +-- Решение записывается в SQLite (profile_apps) → обновляется capability-контекст Isolate
+```
+
+**Где:** Level 1 (Capability Security, SQLite) + Level 3 (Display Server, модальные окна) + Level 4 (Intent API, голосовое управление правами).
+
 ---
 
 ## 5. Search & Tag Engine
@@ -1114,6 +1141,30 @@ Space Settings (SQLite, Level 1):
 
 ---
 
+### 11.5 Фоновый Space
+
+**Что:** Space, который не занимает графическую область на экране, но продолжает работать: синхронизация, фоновые задачи, приём уведомлений.
+
+**Как:**
+
+```
+Background Space (Level 1):
+  |
+  +-- Нет Display Server области (не рендерится, не композитится)
+  +-- Sync Engine (Level 2) — продолжает синхронизацию с Бэком
+  +-- Notification Manager — принимает push-уведомления от Бэка
+  +-- Scheduler — выполняет фоновые задачи (напоминания, закачки)
+  |
+  +-- Взаимодействие с пользователем:
+      +-- Через уведомления активного Space (Notification Manager агрегирует)
+      +-- Через Command Bar активного Space (пользователь может развернуть фоновый Space обратно в Open)
+      +-- Voice-команды маршрутизируются в активный Space; фоновый не обрабатывает ввод напрямую
+```
+
+**Где:** Level 1 (Micro-Kernel, state machine) + Level 2 (Sync Engine). Display Server не участвует.
+
+---
+
 ## 12. Notifications
 
 ### 12.1 Единый поток уведомлений
@@ -1145,6 +1196,29 @@ Push от Бэков:
 ```
 
 **Где:** Level 1 (Notification Manager, SQLite) + Level 3 (Display Server, рендеринг) + Level 2 (P2P, приём push).
+
+### 12.2 Центр уведомлений
+
+**Что:** История уведомлений с навигацией и управлением.
+
+**Как:**
+
+```
+Notification Center (Level 1 + Level 3):
+  |
+  +-- SQLite (Level 1): таблица notifications
+  |   +-- id, space_id, type, message, timestamp, read_status, action_url
+  |   +-- Группировка по space_id + date bucket (сегодня, вчера, ранее)
+  |   +-- Очистка: DELETE по space_id или полная TRUNCATE
+  |
+  +-- Display Server (Level 3):
+      +-- Command Bar → "уведомления" → список
+      +-- Свайп с верхнего края → панель истории
+      +-- Клик по уведомлению → switch Space + open action_url
+      +-- Badge (точка) на иконке Space при непрочитанных
+```
+
+**Где:** Level 1 (SQLite, хранение) + Level 3 (Display Server, UI).
 
 ---
 
