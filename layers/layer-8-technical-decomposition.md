@@ -17,10 +17,11 @@ Command Bar      Project Mgr      Window Mgr       App Runtime
   8 режимов        Layout           Нативные         Lifecycle
   Settings         Home             Layout           Sandboxing
                                     Remote Renderer  Permissions UI
-                                                     Security Hooks
-                                                     Session Mgmt
-                                                     Accessibility
-                                                     Warm Recovery
+                                    Game Mode        Security Hooks
+                                    Frame Pacing     Session Mgmt
+                                    Raw Input        Accessibility
+                                    Low-latency      Warm Recovery
+                                                     Secure Txn API
 
 Search &         Communication    Voice Engine     Profile Mgr
 Tag Engine       Layer
@@ -35,8 +36,10 @@ Sync Engine      Security Layer   Display Server   Intent API
   CRDT             Auth Proxy       Layout Engine    Intent Map
   Devices          Encrypt          Effects          Generative UI
   Lazy load        Supply Chain     Remote Renderer
-  Backup Engine    Incident Resp.
-  Energy Manager
+  Backup Engine    Incident Resp.   Game Mode
+  Energy Manager                    Direct GPU ctx
+  Verified Seeding                  Raw Input
+                                    Frame Pacing
 
 Host Shim (Level 0)
   eBPF/XDP         OverlayFS        Network Bridge   VFS Bridge
@@ -272,6 +275,7 @@ Core Base / Raspberry Pi (Linux):
       +-- Новая версия CORE скачивается в /var/core/updates/v2/
       +-- Atomically remount: lowerdir = v2, upperdir сохраняется
       +-- Если v2 не стартует → rollback к v1 за 3 секунды
+      +-- Если v1 тоже не стартует → fallback на «Золотой образ» (golden lowerdir, read-only SquashFS)
       +-- Если v2 работает 24ч → v1 удаляется (garbage collect)
 ```
 
@@ -283,6 +287,34 @@ Core Base / Raspberry Pi (Linux):
 **Где:** Level 0 (Host Shim, mount/verity) + Level 1 (Update Engine, atomic switch).
 
 > Подробно: security-аспекты immutable rootfs, dm-verity, rollback attacks — в [Layer Security, §22.5.4](layer-7-security.md).
+
+### CPU Affinity Policy (Core Pinning)
+
+**Что:** Critical threads закрепляются на dedicated CPU cores для минимального latency.
+
+**Как:**
+
+```
+Adaptive Core Pinning (Host Shim, Level 0):
+  |
+  +-- Core Base (Linux bare metal):
+  |   +-- 2 ядра: pin только render thread Display Server
+  |   +-- 4+ ядер: pin весь Display Server process + Voice Engine thread
+  |   +-- SCHED_RR (round-robin) + high priority — без system hang risk
+  |   +-- Watchdog: если pinned thread не отвечает 100мс → forced unpause + restart
+  |
+  +-- Windows / macOS (CORE как приложение):
+  |   +-- Best effort: HIGH_PRIORITY_CLASS / QOS_CLASS_USER_INTERACTIVE
+  |   +-- Без explicit pinning — ОС не даёт права
+  |
+  +-- Integrity gate:
+      +-- Pin устанавливается только если BLAKE3-hash бинарника совпадает с expected
+      +-- Integrity Monitoring Agent проверяет hash перед установкой affinity
+```
+
+**Почему SCHED_RR, а не SCHED_FIFO:** FIFO + deadlock = system hang. RR вытесняется по кванту времени — безопаснее.
+
+**Где:** Level 0 (Host Shim, thread scheduler).
 
 ---
 
@@ -729,7 +761,69 @@ Display Server (Level 3)
 
 **Где:** Level 3 (Window Manager + Display Server) + Level 2 (Input Router, жесты).
 
-### 3.6 Optimistic Rendering
+### 3.6 Game Mode API
+
+**Что:** Execution profile для игр и real-time приложений. Система отдаёт игре максимум железа, минуя оверхед композитора и оконного менеджера.
+
+**Не путать с полноэкранным layout:** Полноэкранный layout — это просто размер окна. Game Mode — это захват GPU context, raw input и low-latency audio.
+
+**Как:**
+
+```
+Приложение вызывает Core.Graphics.requestGameMode()
+  |
+  v
+Display Server проверяет:
+  +-- Приложение level >= 4? (verified publisher)
+  +-- Пользователь подтвердил в Permissions UI?
+  |
+  v
+Game Mode activated:
+  +-- Direct GPU Context:
+  |   +-- Display Server отдаёт swapchain напрямую приложению (без композитинга)
+  |   +-- Игра рисует в framebuffer напрямую (wgpu surface без intermediate texture)
+  |   +-- VSync control: приложение само управляет present timing (frame pacing)
+  |
+  +-- Raw Input:
+  |   +-- Host Shim перенаправляет HID events напрямую в Isolate (без Input Router)
+  |   +-- Исключение: Panic Gesture (тройное касание угла) — всегда ловится Host Shim
+  |   +-- Клавиатура/мышь/gamepad → напрямую в V8 Isolate
+  |
+  +-- Low-latency Audio:
+  |   +-- CPAL в режиме REALTIME (минимальный буфер, exclusive stream)
+  |   +-- Без системного микшера (no system audio ducking)
+  |
+  +-- CPU Affinity:
+  |   +-- Game thread pinned на dedicated core (см. Host Shim, Core Pinning)
+  |   +-- SCHED_RR + high priority (Core Base)
+  |
+  +-- Network Overlay (опционально):
+      +-- UDP-based real-time socket (не CRDT, не TCP)
+      +-- Для multiplayer: unreliable, ordered, low-latency
+      +-- Шифрование: DTLS (Datagram TLS) — без лишнего RTT
+```
+
+**Frame Pacing:**
+- Игра запрашивает target FPS (60/120/144/240)
+- Host Shim настраивает VSync + present mode (FIFO_RELAXED для Variable Refresh Rate)
+- Если игра не укладывается в target — automatic resolution scaling (render scale 0.5–1.0)
+
+**Выход из Game Mode:**
+- `Esc` (удержание 2 сек) → Window Manager восстанавливает композитинг
+- Panic Gesture → Host Shim принудительно убивает isolate, возвращает Display Server
+- Game crashed → Shadow State Recovery → fallback к Static UI Overlay
+
+**Безопасность:**
+- Game Mode — только для приложений уровня 4+ (verified publisher)
+- Direct GPU context обнуляется перед передачей (GPU memory zeroize)
+- Raw input не перехватывает системные жесты (Panic Gesture, screenshot)
+- Host Shim watchdog: heartbeat каждые 50 мс, dead isolate → kill + recovery
+
+**Где:** Level 3 (Display Server, direct surface) + Level 0 (Host Shim, GPU/input/audio) + Level 2 (Mesh Engine, UDP overlay).
+
+> Подробно: GPU memory isolation, input sandbox, Game Mode security hooks — в [Layer Security, §22](layer-7-security.md).
+
+### 3.7 Optimistic Rendering
 
 **Что:** UI рисует локальные изменения мгновенно, не дожидаясь подтверждения от других устройств. Если прилетает "проигравший" winner по хэшу — экран **не откатывается назад**.
 
@@ -806,7 +900,79 @@ App Runtime (Level 1)
 - При < 10% → приостановка фоновых isolates, освобождение кэша
 - При < 5% → graceful termination неактивных приложений с сохранением state
 
-**Где:** Level 1 (Micro-Kernel, Bun + V8).
+### 4.1.1 Secure Transaction API
+
+**Что:** Биометрическая подпись данных с использованием device key + secure enclave / TPM. Приложение не видит приватный ключ — только результат подписи.
+
+**Как:**
+
+```
+Приложение (банк, крипто-кошелёк):
+  |
+  +-- Запрашивает capability: "secure_sign" в манифесте
+  +-- Пользователь подтверждает в Permissions UI
+  |
+  v
+Вызов API:
+  Core.Security.signWithBiometry({
+    data: transaction_payload,     // данные для подписи
+    key_id: "payment_key_001",     // ID ключа (не сам ключ!)
+    biometry: "required",          // FaceID / TouchID / Windows Hello
+    confirmation_ui: true          // показать системный overlay с деталями
+  })
+  |
+  v
+Micro-Kernel (Level 1):
+  +-- Проверяет capability: есть ли "secure_sign"?
+  +-- Проверяет key_id: принадлежит ли он этому приложению?
+  |
+  v
+Display Server (Level 3) — системный overlay:
+  +-- Рендерит детали транзакции (сумма, получатель, комиссия)
+  +-- Overlay рисуется системой, не приложением — защита от spoofing
+  +-- Пользователь подтверждает: biometric prompt (FaceID / TouchID / PIN)
+  |
+  v
+Host Shim (Level 0) — Secure Enclave / TPM:
+  +-- Приватный ключ никогда не покидает secure enclave
+  +-- Подпись вычисляется внутри enclave: sign(data, private_key) → signature
+  +-- Возвращается только signature (Ed25519)
+  |
+  v
+Приложение получает signature + public_key_fingerprint
+```
+
+**WYSIWYS (What You See Is What You Sign):**
+- Детали транзакции рендерит Display Server, не приложение
+- Приложение не может подменить сумму или получателя — пользователь видит системный overlay
+- Overlay защищён от скриншотов и screen readers (Secure Field)
+
+**Ключи:**
+- Каждое приложение получает app-scoped signing key (derived от device key)
+- Ключи хранятся в TPM / Secure Enclave / Android Keystore / Apple Secure Enclave
+- Backup: ключи шифруются recovery-фразой Owner, хранятся в зашифрованном CRDT
+
+**Rate limiting:**
+- Max 10 подписей / мин на приложение
+- Max 100 подписей / час на профиль
+- Превышение → временная блокировка + уведомление Owner
+
+**Audit:**
+- Каждая подпись записывается в audit log (категория "transaction")
+- Запись: timestamp, app_id, key_id, data_hash (BLAKE3), signature, biometry_result
+
+**Где:** Level 0 (Host Shim, TPM/Secure Enclave) + Level 1 (Micro-Kernel, capability check) + Level 3 (Display Server, confirmation overlay).
+
+> Подробно: WYSIWYS overlay, audit log, rate limiting, side-channel защита — в [Layer Security, §22](layer-7-security.md).
+
+**Idle CPU Policy («Холодный камень»):
+- Host Shim мониторит CPU usage каждого isolate через `v8::Isolate::GetHeapStatistics()` + OS-level CPU accounting
+- Фоновый isolate (background mode) потребляет > 0.5% CPU > 30 секунд подряд → принудительный Suspend
+- Suspend: сериализация state в encrypted SQLite (per-profile) → `v8::Isolate::Dispose()` → 0% CPU
+- Wake-up: по событию (push, user action, timer). Rate limit: max 10 wake-ups/min на isolate. Превышение → isolate помечается suspicious, Owner уведомляется
+- Pinned isolates (Display Server, Voice) — exempt из «Холодного камня»
+
+**Где:** Level 1 (Micro-Kernel, Bun + V8) + Level 0 (Host Shim, CPU monitor).
 
 ### 4.2 App Registry
 
@@ -1786,6 +1952,65 @@ Mesh Engine (Level 2):
 
 **Где:** Level 2 (Mesh Engine) + Level 0 (WireGuard, Host Shim).
 
+### 9.1.1 Verified Content Seeding (Public P2P CDN)
+
+**Что:** Опциональный режим, когда пользователь становится seed'ом для публичного контента (приложения, обновления, verified media). Не BitTorrent — только verified publisher content.
+
+**Не путать с private P2P:** Private mesh — это sync между устройствами одного пользователя. Public seeding — раздача контента другим пользователям через P2P.
+
+**Как:**
+
+```
+Publisher (App Registry):
+  |
+  +-- Загружает пакет в App Registry
+  +-- Пакет подписан Ed25519 (publisher key)
+  +-- CID = BLAKE3(content) — неизменяемый идентификатор
+  +-- Metadata подписана отдельно (name, description, version, dependencies)
+  |
+  v
+App Registry объявляет пакет "public"
+  |
+  v
+User A включает "Public Seeding" (opt-in):
+  +-- Система кэширует пакет локально
+  +-- User A регистрируется в DHT как seed для этого CID
+  +-- Другие пользователи могут найти User A через libp2p DHT
+  |
+  v
+User B запрашивает пакет:
+  +-- Mesh Engine ищет CID в DHT → находит User A (и других seeds)
+  +-- Handshake: ECDH ephemeral keys → encrypted connection
+  +-- User B скачивает пакет по chunks (1 MB each)
+  +-- Каждый chunk проверяется по BLAKE3 →CID
+  +-- Metadata проверяется по publisher signature
+  |
+  v
+User B тоже может стать seed'ом (опционально)
+```
+
+**Защита:**
+- **Verified content only:** seed разрешён только для пакетов, подписанных App Registry. Самоподписанные / неподписанные пакеты не seed'ятся
+- **CID integrity:** любой chunk проверяется по BLAKE3. Подмена → mismatch → отбрасывание
+- **Metadata signing:** имя, описание, иконка подписаны publisher key. Mesh Engine отбрасывает пакеты с невалидной metadata signature
+- **IP privacy:** handshake через relay (onion routing). Прямой P2P — только после ECDH ephemeral key exchange
+
+**Ограничения:**
+- **Opt-in:** пользователь явно включает seeding в Settings. По умолчанию — выключено
+- **Bandwidth cap:** max 10% upload bandwidth для public seed. Настраивается пользователем
+- **Storage cap:** max 5 GB кэша для public seed. LRU eviction
+- **Connection limit:** max 50 одновременных peers на файл
+- **Content filter:** только categories из whitelist (apps, updates, verified media). Не user data, не personal files
+
+**Экономика:**
+- Seeding не оплачивается — это добровольная поддержка экосистемы
+- Publisher может стимулировать: "стать seed'ом → скидка на premium"
+- Для корпоративных: mandatory seeding внутри LAN (офисные машины раздают корпоративные пакеты)
+
+**Где:** Level 2 (Mesh Engine, libp2p DHT) + Level 1 (App Registry, publisher verification) + Level 0 (Host Shim, bandwidth monitor).
+
+> Подробно: verified content signing, IP privacy relay, bandwidth caps — в [Layer Security, §22](layer-7-security.md).
+
 **Erasure Coding (FEC):**
 - Избыточное кодирование в P2P-поток (как в спутниковой связи)
 - Приёмник восстанавливает данные при потере до 30% пакетов без ретрансмита
@@ -1852,6 +2077,18 @@ Anti-entropy:
 - Экспоненциальная задержка (Backoff) при высокой нагрузке на канал
 - Если канал забит → частота обмена хэшами падает до 1 раза в 5 секунд
 - Приоритет: User Interactivity Stream (Z-layer) первым, Cold Storage — по остаточному принципу
+
+**P2P Traffic Priority (IDLE / URGENT):**
+
+| Приоритет | Что | Preemption |
+|-----------|-----|------------|
+| **URGENT** | CRDT-дельты, Intents, User Interactivity Stream | Прерывает IDLE немедленно |
+| **NORMAL** | Metadata sync, MST anti-entropy | Стандартная очередь |
+| **IDLE** | Бинарные blob (видео, логи), prefetch, background sync | Приостанавливается при URGENT |
+
+- URGENT-флаг подписан device key (Ed25519). Mesh Engine отбрасывает неподписанные URGENT-пакеты (защита от fake-URGENT DoS)
+- Padding: все URGENT-пакеты дополняются до фиксированного размера (traffic analysis mitigation)
+- Bandwidth allocation: URGENT = 60% канала, NORMAL = 30%, IDLE = 10% (динамически)
 
 **Bit-Diff (XOR-дельта) — расширенное описание:**
 - Вместо полных 256-битных хэшей → XOR-разница между текущим и предыдущим состоянием узла
