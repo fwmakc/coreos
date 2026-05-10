@@ -16,7 +16,7 @@ os/
 │   ├── investor.md              # Питч для инвестора
 │   ├── gazprom.md               # Промышленный кейс (Газпром)
 │   └── gorynych.md              # Консорциум Яндекс/Сбер/ВК
-├── layers/                      # Слои проектирования (сверху вниз)
+├── layers/                      # Слои проектирования (сверху вниз), актуальная работа здесь
 │   ├── layer-1-user-experience.md          # UX + Space: что видит пользователь
 │   ├── layer-2-ai.md                       # AI-слой: Intent API, Voice, Generative UI, Smart Scheduler
 │   ├── layer-3-system-split.md             # Фронт (Shell) и Бэк (Backoffice)
@@ -26,24 +26,12 @@ os/
 │   ├── layer-7-security.md                 # Безопасность: единый кросс-слойный документ
 │   ├── layer-8-technical-decomposition.md  # Подсистемы: техническая декомпозиция
 │   ├── layer-9-business-model.md           # Бизнес-модель и go-to-market
-├── project/                     # Проектная документация
-│   ├── vision.md                # Видение и философия
+├── project/                     # Устаревшая проектная документация (legacy)
 │   ├── architecture.md          # 5-уровневая архитектура
-│   ├── tech-stack.md            # Стек технологий и обоснование
-│   ├── security.md              # Модель безопасности
-│   ├── multiuser.md             # Мультипользовательность
 │   ├── filesystem.md            # Виртуальная файловая система
-│   ├── ai-layer.md              # ИИ-слой и Intent API
 │   ├── integration-modes.md     # Режимы интеграции с хост-ОС
 │   ├── p2p-sync.md              # P2P-сеть, CRDT, синхронизация
-│   ├── backoffice.md            # Бэк-офис и Суперюзер
 │   ├── stress-tests.md          # Результаты стресс-тестов
-├── mvp/                         # MVP планирование (3 месяца)
-│   ├── README.md                # MVP scope и timeline
-│   ├── track1-runtime.md        # Трек 1: Core Runtime
-│   ├── track2-shell.md          # Трек 2: Core Shell
-│   ├── repo-structure.md        # Структура репозитория
-│   └── tech-decisions.md        # Открытые технические решения
 └── src/                         # Исходный код (TODO)
 ```
 
@@ -55,30 +43,9 @@ os/
 
 ### Before Committing
 
-1. Все новые документы — в `project/`
-2. Формат: Markdown, заголовки `##`, subsections `###`
-3. Каждый документ должен быть самодостаточным — читается без остальных
-4. Cross-reference: ссылаться на другие документы как `[См. architecture.md](architecture.md)`
-
-### Tech Stack (MVP)
-
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Host Shim | Rust (winit + wgpu) | Window, WebGPU rendering, input |
-| Runtime | Bun (TypeScript) | Component tree, layout, IPC |
-| Apps | V8 Isolates (via Bun) | Application sandbox |
-| Rendering | WebGPU (wgpu) | Native canvas, 60 FPS |
-| Voice | Whisper API (OpenAI) | Voice input → Command Bar |
-| Storage | SQLite (Bun built-in) | Projects, ideas, tags |
-
-### Key Architecture Rules (MVP)
-
-- No DOM, no CSS, no Chromium — only WebGPU rendering
-- No GC in system modules — TSCLANG with ARC or manual memory management
-- No JSON in P2P — only binary deltas
-- No central servers — P2P mesh with Merkle Search Trees
-- No IPC bridges — SharedArrayBuffer + zero-copy ABI
-- User interactivity always wins over sync — priority-based scheduling
+1. Формат: Markdown, заголовки `##`, subsections `###`
+2. Каждый документ должен быть самодостаточным — читается без остальных
+3. Cross-reference: ссылаться на другие документы как `[См. architecture.md](architecture.md)`
 
 ### Build Commands (TODO)
 

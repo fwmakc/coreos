@@ -56,6 +56,130 @@ Storage Mgr
 
 ---
 
+## VFS — Content Addressable Store
+
+Фундаментальная подсистема хранения данных. Все файлы, метаданные и версии проходят через VFS.
+
+### Архитектура
+
+```
+VFS
+├── Passport Store (SQLite)
+│   ├── files: id, name, cid, size, project_id, owner_id, created_at, updated_at
+│   ├── versions: version_id, file_id, cid, timestamp, author_id, diff_cid
+│   ├── tags: id, name, color, project_id
+│   └── file_tags: file_id, tag_id
+│
+├── Body Store (blobs/)
+│   └── CID = BLAKE3(content) → префикс 2 символа → blob-файл
+│
+├── Version Store (SQLite, таблица versions)
+│   ├── Полные снапшоты: для бинарных файлов (фото, видео, PDF)
+│   ├── Diff'ы: для текстовых файлов (XOR-дельта между версиями)
+│   └── Retention: старые версии удаляются по политике Owner (default: 30 дней)
+│
+├── Lazy Load Engine
+│   ├── ghost_registry: file_id, cid, available_local, available_on[]
+│   ├── on_demand_fetch: запрос blob'а через P2P Mesh
+│   └── prefetch_queue: приоритетный фоновый скачивание
+│
+├── Mirror Engine
+│   ├── watched_paths: project_id, host_path, fs_type
+│   ├── inotify/FSEvents/ReadDirectoryChanges watcher (Host Shim)
+│   └── sync_log: операция (create|delete|rename), host_path, file_id, timestamp
+│
+└── Deduplication
+    └── CID уже существует → новая passport-запись, blob не копируется
+```
+
+### Content Addressable Storage
+
+- **CID (Content Identifier)** = BLAKE3-хеш содержимого файла. 256 бит, hex-кодирование
+- **Дедупликация:** два одинаковых файла = один blob на диске. Passport-записи ссылаются на один CID
+- **Целостность:** при чтении blob пересчитывается BLAKE3. Если не совпадает с CID → corruption detected → запрос с другого устройства через P2P
+- **Merkle DAG:** опционально, для пакетной верификации. Корневой хеш группы файлов = хеш от concatenated CID'ов. Используется при seeding/backup для проверки целостности пакета
+
+### Passport + Body separation
+
+- **Passport** (SQLite) — «лёгкий» слой: метаданные, теги, права, история версий, ссылки на CID. Мгновенный поиск по миллионам файлов
+- **Body** (blobs/) — «тяжёлый» слой: реальные байты. Управляется жизненным циклом: если ни один passport не ссылается на CID → blob удаляется (garbage collection)
+
+### Version Store
+
+**Copy-on-Write для бинарных файлов:**
+- Пользователь отредактировал `договор.docx` → новый blob (новый CID) → новая запись в `versions`
+- Старый CID остаётся в blobs/ до истечения retention
+
+**Diff'ы для текстовых файлов:**
+- Исходная версия: полный blob
+- Каждое последующее изменение: XOR-дельта между старой и новой версией
+- Восстановление: исходный blob + применение цепочки diff'ей
+- Экономия: правка в одном слове = хранится только изменение, не весь файл
+
+**Retention policy:**
+- Owner настраивает: сколько дней хранить версии, сколько версий максимум
+- Фоновая задача (Scheduler) удаляет устаревшие версии и осиротевшие blob'ы
+
+### Lazy Load Engine
+
+**Ghost-файлы:**
+- Запись в passport с CID, но blob отсутствует локально
+- `available_local = false` → UI показывает облачко рядом с именем файла
+- При открытии: Lazy Load Engine отправляет запрос в Sync Engine → P2P Mesh → устройство с blob'ом
+- Фоновое скачивание: если файл добавлен в проект на ПК, телефон получает ghost-запись мгновенно, а blob подтягивается в фоне
+
+**Prefetch:**
+- Паттерн: пользователь открыл файл 1 из папки → система предзагружает файл 2, 3, 4 (соседи в passport)
+- Плейлист: все треки помечены как `prefetch_priority = high` → загружаются при подключении Wi-Fi
+
+### Mirror Engine
+
+**Двусторонняя синхронизация с хост-ОС:**
+
+```
+Windows: D:\Work
+  |
+  v
+Host Shim (ReadDirectoryChanges)
+  |
+  v
+Mirror Engine:
+  +-- Новый файл "отчет.xlsx" → создать passport-запись → вычислить CID → импорт blob'а
+  +-- Удалён файл "старый.doc" → архивировать passport (мягкое удаление)
+  +-- Переименован файл → обновить имя в passport
+  +-- Изменён файл → новая версия (новый CID)
+  |
+  v
+Storage Manager → VFS (passport + body)
+```
+
+**Обратное направление (CORE → хост-ОС):**
+- Файл создан в CORE → Host Shim создаёт файл в `D:\Work` через стандартные API хост-ОС
+- Файл удалён в CORE → удаление в `D:\Work`
+- Теги: если хост-ОС поддерживает расширенные атрибуты (NTFS ADS, xattr) → теги записываются туда. Иначе — теги только в SQLite CORE
+
+**Watcher API (Host Shim):**
+- Windows: `ReadDirectoryChangesW` на mirror-пути
+- Linux: `inotify` на mirror-пути
+- macOS: `FSEvents` на mirror-пути
+- События: `create`, `delete`, `rename`, `modify` → debounce 100ms → batch → Mirror Engine
+
+### Карта связей VFS
+
+| UX-сценарий | Подсистема | Architecture Level |
+|-------------|-----------|-------------------|
+| Открыть файл | Passport Store → Body Store | Level 1 |
+| История версий | Version Store | Level 1 |
+| Откат к версии | Version Store → replace CID в passport | Level 1 |
+| Дедупликация | CID comparison при импорте | Level 1 |
+| Lazy Load | Lazy Load Engine + Sync Engine | Level 1 + Level 2 |
+| Prefetch | Lazy Load Engine (фоновая задача) | Level 1 |
+| Mirror Folder | Mirror Engine + Host Shim | Level 0 + Level 1 |
+| Garbage Collection | orphaned blob removal | Level 1 (Scheduler) |
+| Целостность blob | BLAKE3 recalc on read | Level 1 |
+
+---
+
 ## 1. Command Bar (Строка)
 
 ### 1.1 Input Router
