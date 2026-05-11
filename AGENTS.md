@@ -16,7 +16,7 @@ os/
 │   ├── investor.md              # Питч для инвестора
 │   ├── gazprom.md               # Промышленный кейс (Газпром)
 │   └── gorynych.md              # Консорциум Яндекс/Сбер/ВК
-├── layers/                      # Слои проектирования (сверху вниз), актуальная работа здесь
+├── layers/                      # Слои проектирования (сверху вниз)
 │   ├── layer-1-user-experience.md          # UX + Space: что видит пользователь
 │   ├── layer-2-ai.md                       # AI-слой: Intent API, Voice, Generative UI, Smart Scheduler
 │   ├── layer-3-system-split.md             # Фронт (Shell) и Бэк (Backoffice)
@@ -26,7 +26,12 @@ os/
 │   ├── layer-7-security.md                 # Безопасность: единый кросс-слойный документ
 │   ├── layer-8-technical-decomposition.md  # Подсистемы: техническая декомпозиция
 │   ├── layer-9-hardware-requirements.md    # Требования к железу
-│   └── layer-10-business-model.md          # Бизнес-модель и go-to-market
+│   ├── layer-10-business-model.md          # Бизнес-модель и go-to-market
+│   └── layer-11-developer-reference.md     # Агрегированный справочник разработчика
+├── plan/                        # План реализации: 37 этапов + roadmap
+│   ├── README.md                # Принципы разделения, сводка по этапам
+│   ├── roadmap.md               # Человеческое описание всех 37 этапов
+│   └── phase-01..37             # Детальные спецификации этапов
 └── src/                         # Исходный код (TODO)
 ```
 
