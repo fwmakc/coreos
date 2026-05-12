@@ -1,0 +1,31 @@
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+
+# Bun / Node
+node_modules/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Temporary
+*.tmp
+*.temp

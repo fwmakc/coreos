@@ -1,0 +1,18 @@
+[package]
+name = "coreos-display-server"
+description = "WebGPU-based display server and compositor"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+wgpu = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+
+[lib]
+name = "coreos_display_server"
+path = "src/lib.rs"

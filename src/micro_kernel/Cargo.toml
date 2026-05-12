@@ -1,0 +1,17 @@
+[package]
+name = "coreos-micro-kernel"
+description = "Core runtime: IPC, security, VFS, and CRDT engine bindings"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+
+[lib]
+name = "coreos_micro_kernel"
+path = "src/lib.rs"

@@ -1,0 +1,16 @@
+[package]
+name = "coreos-island-mode"
+description = "WebView embedding and legacy app isolation"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+
+[lib]
+name = "coreos_island_mode"
+path = "src/lib.rs"

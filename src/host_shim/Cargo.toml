@@ -1,0 +1,30 @@
+[package]
+name = "coreos-host-shim"
+description = "Host OS abstraction layer: window, input, audio, storage, network"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+winit = { workspace = true }
+wgpu = { workspace = true }
+cpal = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+
+[target.'cfg(target_os = "android")'.dependencies]
+# TODO: oboe, ndk-glue
+
+[target.'cfg(target_os = "ios")'.dependencies]
+# TODO: objc2, uikit
+
+[lib]
+name = "coreos_host_shim"
+path = "src/lib.rs"
+
+[[bin]]
+name = "host_shim_demo"
+path = "src/main.rs"
