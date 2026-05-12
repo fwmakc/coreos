@@ -7,6 +7,7 @@
 
 pub mod ipc;
 pub mod security;
+pub mod sqlite;
 
 /// Micro-kernel version.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -4,6 +4,8 @@ members = [
     "display_server",
     "micro_kernel",
     "island_mode",
+    "fuzzy_search",
+    "tests",
 ]
 resolver = "2"
 

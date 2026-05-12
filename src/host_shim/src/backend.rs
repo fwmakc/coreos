@@ -30,3 +30,43 @@ impl std::fmt::Display for HostError {
 }
 
 impl std::error::Error for HostError {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn host_error_display_window_creation() {
+        let err = HostError::WindowCreationFailed("DPI aware init failed".into());
+        let msg = format!("{err}");
+        assert!(msg.contains("window creation failed"));
+        assert!(msg.contains("DPI aware init failed"));
+    }
+
+    #[test]
+    fn host_error_display_audio_unavailable() {
+        let err = HostError::AudioUnavailable;
+        assert_eq!(format!("{err}"), "audio subsystem unavailable");
+    }
+
+    #[test]
+    fn host_error_display_network_init() {
+        let err = HostError::NetworkInitFailed("port 443 in use".into());
+        let msg = format!("{err}");
+        assert!(msg.contains("network init failed"));
+        assert!(msg.contains("port 443 in use"));
+    }
+
+    #[test]
+    fn host_error_implements_std_error() {
+        let err: Box<dyn std::error::Error> = Box::new(HostError::AudioUnavailable);
+        assert_eq!(err.to_string(), "audio subsystem unavailable");
+    }
+
+    #[test]
+    fn host_error_debug() {
+        let err = HostError::AudioUnavailable;
+        let dbg = format!("{err:?}");
+        assert!(dbg.contains("AudioUnavailable"));
+    }
+}

@@ -1,0 +1,15 @@
+[package]
+name = "integration_tests"
+description = "Cross-crate integration test suite for CORE OS"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[dependencies]
+coreos-host-shim = { path = "../host_shim" }
+coreos-display-server = { path = "../display_server" }
+coreos-micro-kernel = { path = "../micro_kernel" }
+coreos-island-mode = { path = "../island_mode" }
+serde_json = "1"

@@ -33,3 +33,48 @@ impl Default for WebViewConfig {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn webview_config_default() {
+        let cfg = WebViewConfig::default();
+        assert_eq!(cfg.engine, WebEngine::CEF);
+        assert!(cfg.javascript);
+        assert!(!cfg.local_storage);
+    }
+
+    #[test]
+    fn webview_config_custom() {
+        let cfg = WebViewConfig {
+            engine: WebEngine::WebKit,
+            javascript: false,
+            local_storage: true,
+        };
+        assert_eq!(cfg.engine, WebEngine::WebKit);
+        assert!(!cfg.javascript);
+        assert!(cfg.local_storage);
+    }
+
+    #[test]
+    fn web_engine_variants() {
+        let engines = vec![
+            WebEngine::CEF,
+            WebEngine::WebKit,
+            WebEngine::WebView2,
+            WebEngine::WKWebView,
+        ];
+        assert_eq!(engines.len(), 4);
+    }
+
+    #[test]
+    fn webview_config_clone() {
+        let cfg = WebViewConfig::default();
+        let cloned = cfg.clone();
+        assert_eq!(cfg.engine, cloned.engine);
+        assert_eq!(cfg.javascript, cloned.javascript);
+        assert_eq!(cfg.local_storage, cloned.local_storage);
+    }
+}

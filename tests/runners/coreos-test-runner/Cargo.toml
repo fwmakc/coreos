@@ -1,0 +1,11 @@
+[package]
+name = "coreos-test-runner"
+version = "0.1.0"
+edition = "2021"
+description = "Test runner that maps specification TC-IDs to cargo test results"
+
+[dependencies]
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+walkdir = "2"

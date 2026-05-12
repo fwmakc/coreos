@@ -13,6 +13,9 @@ wgpu = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
 
+[dev-dependencies]
+pollster = "0.3"
+
 [lib]
 name = "coreos_display_server"
 path = "src/lib.rs"
