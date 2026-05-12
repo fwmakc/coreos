@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md — CORE OS Progress Report
 
 > Last updated: 2026-05-12  
-> Status: **Pre-Alpha / Foundation Phase**
+> Status: **Pre-Alpha / Phase 0: Playable Demo**
 
 ---
 
@@ -19,15 +19,17 @@ CORE OS is a cross-platform overlay runtime in the **early development** stage. 
 - **Technology stack frozen:** Rust for systems layer, Bun/TypeScript for runtime and apps
 
 ### Source Code (In Progress)
-- **Rust workspace** initialized in `src/` with 4 crates:
+- **Rust workspace** initialized in `src/` with 6 crates:
   - `coreos-host-shim` — window, input, audio, storage, network abstraction
   - `coreos-display-server` — WebGPU rendering and compositing
-  - `coreos-micro-kernel` — IPC and capability security bindings
+  - `coreos-micro-kernel` — IPC, capability security, SQLite WAL engine
   - `coreos-island-mode` — WebView embedding abstraction
+  - `coreos-fuzzy-search` — fuzzy search engine with Levenshtein distance
+  - `integration_tests` — cross-crate integration test suite
 - **CI/CD:** GitHub Actions configured for Rust build/test/lint across Linux, Windows, macOS
 
 ### What Does NOT Exist Yet
-- No runnable binary (window opens, but event loop is stubbed)
+- No playable demo binary (Phase 0 in progress)
 - No TypeScript runtime modules
 - No P2P mesh, CRDT engine, or AI pipelines
 - No installer or release artifacts
@@ -38,6 +40,7 @@ CORE OS is a cross-platform overlay runtime in the **early development** stage. 
 
 | Milestone | Target | Deliverable |
 |-----------|--------|-------------|
+| **Phase 0** | **June 2026** | **Playable Demo: window + cursor + clicks + text + Command Bar** |
 | Phase 1 | Q3 2026 | Host window + event loop on Windows |
 | Phase 1–5 | Q4 2026 | Host Shim on Windows, macOS, Linux, Android, iOS |
 | Phase 9–11 | Q1 2027 | GPU rendering pipeline (triangle → compositor) |
