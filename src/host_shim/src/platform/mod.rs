@@ -50,7 +50,8 @@ mod windows;
     target_os = "windows",
     target_os = "linux",
     target_os = "macos",
-    target_os = "android"
+    target_os = "android",
+    target_os = "ios"
 ))]
 mod winit_impl;
 

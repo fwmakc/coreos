@@ -16,12 +16,13 @@ tokio = { workspace = true }
 serde = { workspace = true }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+rubato = "0.15"
+zeroize = { version = "1.8", features = ["derive"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
-# TODO: oboe, ndk-glue
+winit = { workspace = true, features = ["android-native-activity"] }
 
 [target.'cfg(target_os = "ios")'.dependencies]
-# TODO: objc2, uikit
 
 [lib]
 name = "w_host_shim"

@@ -88,6 +88,28 @@ bun test
 cargo clippy -- -D warnings
 ```
 
+#### Android (cross-compilation via NDK)
+
+```powershell
+# Prerequisites: Android SDK + NDK installed, cargo-ndk installed
+# Set NDK path
+$env:ANDROID_NDK_HOME = "$env:ANDROID_HOME\ndk\29.0.14206865"
+
+# Install Android targets (one-time)
+rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+
+# Install cargo-ndk (one-time)
+cargo install cargo-ndk
+
+# Build host_shim for all Android targets
+cd src; cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 build -p w-host-shim --lib
+
+# Build single target
+cd src; cargo ndk -t arm64-v8a build -p w-host-shim --lib
+```
+
+> **Note:** winit requires the `android-native-activity` feature for Android builds. This is configured in `host_shim/Cargo.toml` under `[target.'cfg(target_os = "android")'.dependencies]`.
+
 #### WSL Ubuntu (cross-platform verification)
 
 ```bash
@@ -118,6 +140,12 @@ wsl -d Ubuntu -- pkill -f "target/debug/demo"
 - **Single Responsibility:** One module — one concern. Rendering, input, business logic, and resource management must live in separate modules.
 - **No God Objects:** A struct must not accumulate unrelated state. If a struct has more than ~8 fields, split it into subsystems.
 - **Layered Design:** Keep host/shim, display server, and app logic isolated. The app must not directly touch wgpu command encoders.
+
+### No Stubs Rule
+- **Every implementation must be real and functional.** No `TODO` placeholders, no `unimplemented!()`, no empty function bodies, no stub structs that do nothing.
+- **If a phase cannot be fully implemented**, implement what is possible and document the remaining gap explicitly in the phase file — but never ship a stub.
+- **Exception: macOS and iOS** — if a physical Apple device is required to verify functionality, the implementation may compile and pass CI without runtime verification. The code must still be complete and correct, just not manually tested on hardware.
+- **Any existing stubs must be replaced** when their phase is reached. A stub from an earlier phase is debt that gets paid off.
 
 ### Code Quality
 - **DRY:** Extract duplication immediately. Two similar blocks → one generic function or trait.

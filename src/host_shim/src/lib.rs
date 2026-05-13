@@ -5,6 +5,7 @@
 
 #![warn(missing_docs)]
 
+pub mod audio;
 pub mod backend;
 pub mod events;
 pub mod host_event;

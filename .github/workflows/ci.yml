@@ -24,6 +24,10 @@ jobs:
         with:
           components: rustfmt, clippy
 
+      - name: Ensure cargo in PATH (macOS)
+        if: runner.os == 'macOS'
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
         with:
@@ -44,6 +48,38 @@ jobs:
 
       - name: Test
         run: cd src && cargo test --all-targets
+
+  android:
+    name: Android Cross-Compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Android targets
+        run: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r29
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src
+
+      - name: Build host_shim (all Android targets)
+        working-directory: src
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 build -p w-host-shim --lib
 
   test-report:
     name: Test Report & Coverage
