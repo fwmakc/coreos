@@ -18,6 +18,9 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
 rubato = "0.15"
 zeroize = { version = "1.8", features = ["derive"] }
+notify = "6"
+blake3 = "1"
+fs4 = "0.12"
 
 [target.'cfg(target_os = "android")'.dependencies]
 winit = { workspace = true, features = ["android-native-activity"] }
