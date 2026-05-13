@@ -14,7 +14,7 @@ pub struct ShapeVertex {
     position: [f32; 2],
     center: [f32; 2],
     radius: f32,
-    _pad: f32,
+    aspect: f32,
     color: [f32; 4],
 }
 
@@ -35,6 +35,7 @@ struct QuadBounds {
     color: [f32; 4],
     center: [f32; 2],
     radius: f32,
+    aspect: f32,
 }
 
 /// GPU pipeline and buffer for shape quads.
@@ -89,6 +90,11 @@ impl ShapeRenderer {
                         wgpu::VertexAttribute {
                             offset: std::mem::size_of::<[f32; 5]>() as wgpu::BufferAddress,
                             shader_location: 3,
+                            format: wgpu::VertexFormat::Float32,
+                        },
+                        wgpu::VertexAttribute {
+                            offset: std::mem::size_of::<[f32; 6]>() as wgpu::BufferAddress,
+                            shader_location: 4,
                             format: wgpu::VertexFormat::Float32x4,
                         },
                     ],
@@ -153,20 +159,25 @@ impl ShapeRenderer {
                     color,
                     center: [0.0; 2],
                     radius: 0.0,
+                    aspect: 0.0,
                 });
             }
             Shape::Circle { x, y, radius, color } => {
                 let [cx, cy] = screen_to_ndc(x, y);
                 let [rx, _] = screen_to_ndc(x + radius, y);
-                let r_ndc = rx - cx;
+                let [_, ry] = screen_to_ndc(x, y + radius);
+                let r_ndc_x = rx - cx;
+                let r_ndc_y = cy - ry;
+                let aspect = r_ndc_x / r_ndc_y;
                 self.push_quad(QuadBounds {
-                    left: cx - r_ndc,
-                    right: cx + r_ndc,
-                    top: cy + r_ndc,
-                    bottom: cy - r_ndc,
+                    left: cx - r_ndc_x,
+                    right: cx + r_ndc_x,
+                    top: cy + r_ndc_y,
+                    bottom: cy - r_ndc_y,
                     color,
                     center: [cx, cy],
-                    radius: r_ndc,
+                    radius: r_ndc_x,
+                    aspect,
                 });
             }
         }
@@ -177,7 +188,7 @@ impl ShapeRenderer {
             position: [x, y],
             center: b.center,
             radius: b.radius,
-            _pad: 0.0,
+            aspect: b.aspect,
             color: b.color,
         };
         self.vertices.extend_from_slice(&[

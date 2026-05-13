@@ -14,7 +14,7 @@ mod app;
 mod graphics;
 mod input;
 
-use app::{AppState, CMD_FONT_SIZE, CMD_PANEL_COLOR, CMD_PANEL_HEIGHT, CURSOR_COLOR, FONT_SIZE, TEXT_COLOR};
+use app::{AppState, CMD_FONT_SIZE, CMD_PANEL_COLOR, CMD_PANEL_HEIGHT, CURSOR_COLOR, CommandResult, FONT_SIZE, HELP_TEXT, TEXT_COLOR};
 
 use graphics::shape::{Shape, ShapeRenderer};
 use graphics::text::{TextEntry, TextRenderer};
@@ -33,10 +33,14 @@ fn screen_to_ndc(x: f32, y: f32, w: f32, h: f32) -> [f32; 2] {
     [(x / w) * 2.0 - 1.0, 1.0 - (y / h) * 2.0]
 }
 
+struct GpuResources {
+    ctx: GraphicsContext,
+    shapes: ShapeRenderer,
+    text_renderer: TextRenderer,
+}
+
 struct DemoApp {
-    ctx: Option<GraphicsContext>,
-    shapes: Option<ShapeRenderer>,
-    text_renderer: Option<TextRenderer>,
+    gpu: Option<GpuResources>,
     app: AppState,
     input: InputHandler,
     last_frame_time: Instant,
@@ -46,9 +50,7 @@ struct DemoApp {
 impl DemoApp {
     fn new() -> Self {
         Self {
-            ctx: None,
-            shapes: None,
-            text_renderer: None,
+            gpu: None,
             app: AppState::default(),
             input: InputHandler::default(),
             last_frame_time: Instant::now(),
@@ -60,9 +62,7 @@ impl DemoApp {
         let ctx = pollster::block_on(GraphicsContext::new(window));
         let shapes = ShapeRenderer::new(&ctx);
         let text_renderer = TextRenderer::new(&ctx);
-        self.ctx = Some(ctx);
-        self.shapes = Some(shapes);
-        self.text_renderer = Some(text_renderer);
+        self.gpu = Some(GpuResources { ctx, shapes, text_renderer });
     }
 
     fn handle_command(&mut self, cmd: Command, elwt: &ActiveEventLoop) {
@@ -75,25 +75,54 @@ impl DemoApp {
                 self.app.toggle_command_bar();
                 info!("command bar toggled: {}", self.app.command_bar_visible);
             }
+            Command::ToggleHelp => {
+                self.app.help_visible = !self.app.help_visible;
+                info!("help overlay toggled");
+            }
             Command::Type(ch, target) => {
                 self.app.type_char(ch, target);
             }
             Command::Backspace(target) => {
                 self.app.backspace(target);
             }
+            Command::HistoryUp => {
+                self.app.history_up();
+            }
+            Command::HistoryDown => {
+                self.app.history_down();
+            }
             Command::Execute => {
-                if let Some(cmd) = self.app.execute_command() {
-                    info!("command executed: {}", cmd);
+                if let Some(result) = self.app.execute_command() {
+                    match &result {
+                        CommandResult::Exit => {
+                            info!("command: exit");
+                            elwt.exit();
+                        }
+                        CommandResult::ClearCircles => {
+                            self.app.clear_circles();
+                            info!("command: circles cleared");
+                        }
+                        CommandResult::ResizeCursor(size) => {
+                            info!("command: cursor resized to {:.0}", size);
+                        }
+                        CommandResult::ShowHelp => {
+                            info!("command: help");
+                        }
+                        CommandResult::Unknown(cmd) => {
+                            info!("unknown command: {}", cmd);
+                        }
+                    }
                 }
             }
             Command::AddCircle => {
-                self.app.add_circle();
-                info!(
-                    "circle added at ({:.0}, {:.0}), total {}",
-                    self.app.cursor_pos_x(),
-                    self.app.cursor_pos_y(),
-                    self.app.circles().len()
-                );
+                if self.app.add_circle() {
+                    info!(
+                        "circle added at ({:.0}, {:.0}), total {}",
+                        self.app.cursor_pos_x(),
+                        self.app.cursor_pos_y(),
+                        self.app.circles().len()
+                    );
+                }
             }
             Command::ClearCircles => {
                 self.app.clear_circles();
@@ -106,8 +135,8 @@ impl DemoApp {
                 self.app.set_cursor_pos(x, y);
             }
             Command::WindowResized(w, h) => {
-                if let Some(ctx) = &mut self.ctx {
-                    ctx.resize(PhysicalSize::new(w, h));
+                if let Some(gpu) = &mut self.gpu {
+                    gpu.ctx.resize(PhysicalSize::new(w, h));
                 }
             }
         }
@@ -119,8 +148,8 @@ impl DemoApp {
         let elapsed = now.duration_since(self.last_frame_time).as_secs_f64();
         if elapsed >= 1.0 {
             let fps = self.frame_count as f64 / elapsed;
-            if let Some(ctx) = &self.ctx {
-                ctx.window().set_title(&format!("CORE OS Demo — {:.0} FPS", fps));
+            if let Some(gpu) = &self.gpu {
+                gpu.ctx.window().set_title(&format!("CORE OS Demo — {:.0} FPS", fps));
             }
             self.frame_count = 0;
             self.last_frame_time = now;
@@ -128,30 +157,27 @@ impl DemoApp {
     }
 
     fn build_and_render(&mut self) {
-        let ctx = self.ctx.as_mut().expect("gpu not initialized");
-        let shapes = self.shapes.as_mut().expect("gpu not initialized");
-        let text_renderer = self.text_renderer.as_mut().expect("gpu not initialized");
-
-        shapes.clear();
-        let (w, h) = ctx.window_size_f32();
+        let gpu = self.gpu.as_mut().expect("gpu not initialized");
+        let (w, h) = gpu.ctx.window_size_f32();
         let to_ndc = |x, y| screen_to_ndc(x, y, w, h);
 
-        build_shapes(shapes, &self.app, w, h, &to_ndc);
-        shapes.upload(ctx);
+        gpu.shapes.clear();
+        build_shapes(&mut gpu.shapes, &self.app, w, h, &to_ndc);
+        gpu.shapes.upload(&gpu.ctx);
 
-        let text_entries = build_text_entries(&self.app, w, h);
-        let text_vertices = text_renderer.prepare(ctx, &text_entries, to_ndc);
-        text_renderer.upload(ctx, &text_vertices);
+        let text_entries = build_text_entries(&self.app, h);
+        let text_vertices = gpu.text_renderer.prepare(&gpu.ctx, &text_entries, to_ndc);
+        gpu.text_renderer.upload(&gpu.ctx, &text_vertices);
 
-        render_frame(ctx, shapes, text_renderer);
+        render_frame(&mut gpu.ctx, &gpu.shapes, &gpu.text_renderer);
 
-        ctx.request_redraw();
+        gpu.ctx.request_redraw();
     }
 }
 
 impl ApplicationHandler for DemoApp {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        if self.ctx.is_none() {
+        if self.gpu.is_none() {
             let window_attrs = winit::window::WindowAttributes::default()
                 .with_title("CORE OS Demo")
                 .with_inner_size(PhysicalSize::new(1280, 720));
@@ -173,11 +199,11 @@ impl ApplicationHandler for DemoApp {
         window_id: winit::window::WindowId,
         event: winit::event::WindowEvent,
     ) {
-        let ctx = match &self.ctx {
-            Some(c) => c,
+        let ctx = match &self.gpu {
+            Some(g) => g.ctx.window(),
             None => return,
         };
-        if window_id != ctx.window().id() {
+        if window_id != ctx.id() {
             return;
         }
 
@@ -240,7 +266,7 @@ fn build_shapes(
     }
 }
 
-fn build_text_entries<'a>(app: &'a AppState, _w: f32, h: f32) -> Vec<TextEntry<'a>> {
+fn build_text_entries<'a>(app: &'a AppState, h: f32) -> Vec<TextEntry<'a>> {
     let mut entries = Vec::new();
 
     if !app.typed_text().is_empty() {
@@ -250,6 +276,16 @@ fn build_text_entries<'a>(app: &'a AppState, _w: f32, h: f32) -> Vec<TextEntry<'
             screen_x: 20.0,
             screen_y_baseline: 60.0,
             color: TEXT_COLOR,
+        });
+    }
+
+    if app.help_visible {
+        entries.push(TextEntry {
+            text: HELP_TEXT,
+            font_size: CMD_FONT_SIZE,
+            screen_x: 20.0,
+            screen_y_baseline: h - CMD_PANEL_HEIGHT - 10.0,
+            color: [0.6, 0.8, 1.0, 1.0],
         });
     }
 
@@ -320,7 +356,7 @@ fn main() {
     info!("CORE OS Phase 0 — Playable Demo starting...");
 
     let event_loop = EventLoop::new().unwrap();
-    event_loop.set_control_flow(ControlFlow::Poll);
+    event_loop.set_control_flow(ControlFlow::Wait);
 
     let mut demo = DemoApp::new();
     event_loop.run_app(&mut demo).expect("event loop failed");

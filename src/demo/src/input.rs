@@ -14,8 +14,11 @@ const SCROLL_SENSITIVITY: f32 = 2.0;
 pub enum Command {
     Exit,
     ToggleCommandBar,
+    ToggleHelp,
     Type(char, TextTarget),
     Backspace(TextTarget),
+    HistoryUp,
+    HistoryDown,
     Execute,
     AddCircle,
     ClearCircles,
@@ -89,6 +92,9 @@ impl InputHandler {
     ) -> Vec<Command> {
         let mut cmds = Vec::new();
         match key {
+            Key::Named(NamedKey::F1) => {
+                cmds.push(Command::ToggleHelp);
+            }
             Key::Named(NamedKey::Escape) => {
                 if self.modifiers.control_key() && self.modifiers.shift_key() {
                     info!("panic gesture triggered");
@@ -109,6 +115,12 @@ impl InputHandler {
             }
             Key::Named(NamedKey::Enter) if command_bar_visible => {
                 cmds.push(Command::Execute);
+            }
+            Key::Named(NamedKey::ArrowUp) if command_bar_visible => {
+                cmds.push(Command::HistoryUp);
+            }
+            Key::Named(NamedKey::ArrowDown) if command_bar_visible => {
+                cmds.push(Command::HistoryDown);
             }
             Key::Named(NamedKey::Space) if self.modifiers.shift_key() => {
                 cmds.push(Command::ToggleCommandBar);
