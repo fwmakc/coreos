@@ -17,6 +17,8 @@ pub enum Command {
     ToggleHelp,
     Type(char, TextTarget),
     Backspace(TextTarget),
+    NewlineTyped,
+    ClearTyped,
     HistoryUp,
     HistoryDown,
     Execute,
@@ -97,7 +99,7 @@ impl InputHandler {
                 } else if command_bar_visible {
                     cmds.push(Command::ToggleCommandBar);
                 } else {
-                    cmds.push(Command::Exit);
+                    cmds.push(Command::ClearTyped);
                 }
             }
             Key::Named(NamedKey::Backspace) => {
@@ -110,6 +112,9 @@ impl InputHandler {
             }
             Key::Named(NamedKey::Enter) if command_bar_visible => {
                 cmds.push(Command::Execute);
+            }
+            Key::Named(NamedKey::Enter) => {
+                cmds.push(Command::NewlineTyped);
             }
             Key::Named(NamedKey::ArrowUp) if command_bar_visible => {
                 cmds.push(Command::HistoryUp);

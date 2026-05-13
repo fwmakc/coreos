@@ -157,6 +157,14 @@ impl AppState {
         }
     }
 
+    pub fn newline_typed_text(&mut self) {
+        self.typed_text.push('\n');
+    }
+
+    pub fn clear_typed_text(&mut self) {
+        self.typed_text.clear();
+    }
+
     pub fn execute_command(&mut self) -> Option<CommandResult> {
         if self.command_text.is_empty() {
             return None;
@@ -374,5 +382,24 @@ mod tests {
         assert!(s.command_bar_visible);
         s.toggle_command_bar();
         assert!(!s.command_bar_visible);
+    }
+
+    #[test]
+    fn newline_typed_text() {
+        let mut s = AppState::default();
+        s.type_char('a', TextTarget::Typed);
+        s.newline_typed_text();
+        s.type_char('b', TextTarget::Typed);
+        assert_eq!(s.typed_text(), "a\nb");
+    }
+
+    #[test]
+    fn clear_typed_text() {
+        let mut s = AppState::default();
+        s.type_char('x', TextTarget::Typed);
+        s.type_char('y', TextTarget::Typed);
+        assert_eq!(s.typed_text(), "xy");
+        s.clear_typed_text();
+        assert!(s.typed_text().is_empty());
     }
 }

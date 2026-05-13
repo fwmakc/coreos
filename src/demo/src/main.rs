@@ -43,22 +43,30 @@ struct GpuResources {
     text_renderer: TextRenderer,
 }
 
+const CURSOR_BLINK_PERIOD: f64 = 1.0;
+const CURSOR_BLINK_ON_RATIO: f64 = 0.6;
+
 struct DemoApp {
     gpu: Option<GpuResources>,
     app: AppState,
     input: InputHandler,
     last_frame_time: Instant,
+    last_update_time: Instant,
     frame_count: u32,
+    cursor_blink_accum: f64,
 }
 
 impl DemoApp {
     fn new() -> Self {
+        let now = Instant::now();
         Self {
             gpu: None,
             app: AppState::default(),
             input: InputHandler::default(),
-            last_frame_time: Instant::now(),
+            last_frame_time: now,
+            last_update_time: now,
             frame_count: 0,
+            cursor_blink_accum: 0.0,
         }
     }
 
@@ -92,6 +100,18 @@ impl DemoApp {
             }
             Command::Backspace(target) => {
                 self.app.backspace(target);
+            }
+            Command::NewlineTyped => {
+                self.app.newline_typed_text();
+            }
+            Command::ClearTyped => {
+                if self.app.typed_text().is_empty() {
+                    info!("no text to clear, exiting");
+                    elwt.exit();
+                } else {
+                    self.app.clear_typed_text();
+                    info!("typed text cleared");
+                }
             }
             Command::HistoryUp => {
                 self.app.history_up();
@@ -151,8 +171,12 @@ impl DemoApp {
     }
 
     fn update_fps(&mut self) {
-        self.frame_count += 1;
         let now = Instant::now();
+        let dt = now.duration_since(self.last_update_time).as_secs_f64();
+        self.last_update_time = now;
+        self.cursor_blink_accum = (self.cursor_blink_accum + dt) % CURSOR_BLINK_PERIOD;
+
+        self.frame_count += 1;
         let elapsed = now.duration_since(self.last_frame_time).as_secs_f64();
         if elapsed >= 1.0 {
             let fps = self.frame_count as f64 / elapsed;
@@ -175,7 +199,8 @@ impl DemoApp {
         build_shapes(&mut gpu.shapes, &self.app, w, h, &to_ndc);
         gpu.shapes.upload(&gpu.ctx);
 
-        let text_entries = build_text_entries(&self.app, &gpu.text_renderer, w, h);
+        let cursor_visible = self.cursor_blink_accum < CURSOR_BLINK_PERIOD * CURSOR_BLINK_ON_RATIO;
+        let text_entries = build_text_entries(&self.app, &gpu.text_renderer, w, h, cursor_visible);
         let text_vertices = gpu.text_renderer.prepare(&gpu.ctx, &text_entries, to_ndc);
         gpu.text_renderer.upload(&gpu.ctx, &text_vertices);
 
@@ -281,26 +306,30 @@ fn build_text_entries<'a>(
     text_renderer: &TextRenderer,
     w: f32,
     h: f32,
+    cursor_visible: bool,
 ) -> Vec<TextEntry<'a>> {
     let mut entries = Vec::new();
 
     if !app.typed_text().is_empty() {
         let line_height = FONT_SIZE * 1.2;
-        let lines = wrap_text(
-            text_renderer,
-            app.typed_text(),
-            FONT_SIZE,
-            w - 40.0,
-            line_height,
-        );
-        for (line, y_off) in lines {
-            entries.push(TextEntry {
-                text: line,
-                font_size: FONT_SIZE,
-                screen_x: 20.0,
-                screen_y_baseline: 60.0 + y_off,
-                color: TEXT_COLOR,
-            });
+        let mut y_offset = 0.0f32;
+        for paragraph in app.typed_text().split('\n') {
+            if paragraph.is_empty() {
+                y_offset += line_height;
+                continue;
+            }
+            let lines = wrap_text(text_renderer, paragraph, FONT_SIZE, w - 40.0, line_height);
+            let line_count = lines.len();
+            for (line, wrap_y) in lines {
+                entries.push(TextEntry {
+                    text: line,
+                    font_size: FONT_SIZE,
+                    screen_x: 20.0,
+                    screen_y_baseline: 60.0 + y_offset + wrap_y,
+                    color: TEXT_COLOR,
+                });
+            }
+            y_offset += line_height * line_count as f32;
         }
     }
 
@@ -324,14 +353,28 @@ fn build_text_entries<'a>(
         }
     }
 
-    if app.command_bar_visible && !app.command_text().is_empty() {
-        entries.push(TextEntry {
-            text: app.command_text(),
-            font_size: CMD_FONT_SIZE,
-            screen_x: 10.0,
-            screen_y_baseline: h - (CMD_PANEL_HEIGHT / 2.0) + (CMD_FONT_SIZE / 2.0),
-            color: TEXT_COLOR,
-        });
+    if app.command_bar_visible {
+        let cmd_baseline = h - (CMD_PANEL_HEIGHT / 2.0) + (CMD_FONT_SIZE / 2.0);
+        if !app.command_text().is_empty() {
+            entries.push(TextEntry {
+                text: app.command_text(),
+                font_size: CMD_FONT_SIZE,
+                screen_x: 10.0,
+                screen_y_baseline: cmd_baseline,
+                color: TEXT_COLOR,
+            });
+        }
+        if cursor_visible {
+            let cursor_x =
+                10.0 + text_renderer.measure_text_width(app.command_text(), CMD_FONT_SIZE);
+            entries.push(TextEntry {
+                text: "|",
+                font_size: CMD_FONT_SIZE,
+                screen_x: cursor_x,
+                screen_y_baseline: cmd_baseline,
+                color: TEXT_COLOR,
+            });
+        }
     }
 
     entries
