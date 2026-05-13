@@ -1,24 +1,29 @@
 //! Linux platform backend (winit + Wayland/X11).
 
-use crate::backend::{HostBackend, HostError};
+use crate::backend::{CursorStyle, HostBackend, HostError};
+use crate::events::KeyCode;
 use crate::host_event::{HostEvent, WindowId};
 use crate::platform::Platform;
 use crate::window::WindowConfig;
 
-/// Linux platform implementation.
+use super::winit_impl;
+
 pub struct LinuxPlatform {
     next_window_id: u64,
     event_queue: Vec<HostEvent>,
     exit_requested: bool,
+    pending_config: Option<WindowConfig>,
+    cursor_style: CursorStyle,
 }
 
 impl LinuxPlatform {
-    /// Create a new Linux platform backend.
     pub fn new() -> Self {
         Self {
             next_window_id: 1,
             event_queue: Vec::new(),
             exit_requested: false,
+            pending_config: None,
+            cursor_style: CursorStyle::Default,
         }
     }
 }
@@ -28,9 +33,10 @@ impl HostBackend for LinuxPlatform {
         Ok(())
     }
 
-    fn create_window(&mut self, _config: WindowConfig) -> Result<WindowId, HostError> {
+    fn create_window(&mut self, config: WindowConfig) -> Result<WindowId, HostError> {
         let id = WindowId(self.next_window_id);
         self.next_window_id += 1;
+        self.pending_config = Some(config);
         Ok(id)
     }
 
@@ -44,7 +50,9 @@ impl HostBackend for LinuxPlatform {
 
     fn shutdown(&mut self) {}
 
-    fn set_cursor_style(&mut self, _style: crate::backend::CursorStyle) {}
+    fn set_cursor_style(&mut self, style: CursorStyle) {
+        self.cursor_style = style;
+    }
 }
 
 impl Platform for LinuxPlatform {
@@ -52,7 +60,14 @@ impl Platform for LinuxPlatform {
         self.event_queue.push(event);
     }
 
-    fn run(&mut self, _event_handler: &mut dyn FnMut(HostEvent)) -> Result<(), HostError> {
-        Ok(())
+    fn run(&mut self, event_handler: &mut dyn FnMut(HostEvent)) -> Result<(), HostError> {
+        let config = self.pending_config.take().unwrap_or_default();
+        let cursor_style = self.cursor_style;
+        winit_impl::run_winit_loop(config, cursor_style, event_handler, |key, state, mods| {
+            key == KeyCode::Escape
+                && state == winit::event::ElementState::Pressed
+                && mods.control_key()
+                && mods.shift_key()
+        })
     }
 }

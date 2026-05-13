@@ -46,6 +46,9 @@ mod macos;
 #[cfg(target_os = "windows")]
 mod windows;
 
+#[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
+mod winit_impl;
+
 pub mod mock;
 
 /// Create the default platform backend for the current OS.
