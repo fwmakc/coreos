@@ -27,7 +27,7 @@
 ### 3.2 Ввод с клавиатуры
 - KeyDown / KeyUp / KeyRepeat через `winit`.
 - Модификаторы: Shift, Ctrl, Alt, Super (Meta).
-- **Особенность Linux:** Super+Tab = Command Bar в полноэкранном режиме. Alt+Tab = переключение окон внутри CORE [См. layer-1 §4.2].
+- **Особенность Linux:** Super+Tab = Command Bar в полноэкранном режиме. Alt+Tab = переключение окон внутри WORKSPACE [См. layer-1 §4.2].
 - **Panic Gesture:** тройное касание угла или Ctrl+Shift+Esc → `PanicExit`.
 
 ### 3.3 Ввод с мыши и тачпада

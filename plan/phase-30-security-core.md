@@ -1,4 +1,4 @@
-﻿# Этап 30 — Security Core
+﻿# Этап 30 — Security WORKSPACE
 
 ## Цель
 Встроить в систему полноценную безопасность: RBAC, аудит (13 категорий), Key Manager (Ed25519, TPM/Secure Enclave), Session Management (TTL, auto-lock, remote wipe), и Secure Transaction API. После этого этапа Workspace защищена на всех уровнях: аутентификация, авторизация, шифрование, аудит.
@@ -10,7 +10,7 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 12** — Micro-Kernel: Core (SQLite, event loop).
+- **Этап 12** — Micro-Kernel: WORKSPACE (SQLite, event loop).
 - **Этап 13** — Micro-Kernel: Security (capability model, base RBAC).
 - **Этап 14** — Micro-Kernel: VFS (файлы для audit export).
 - **Этап 21** — Backup Engine (recovery phrase, encryption).
@@ -59,7 +59,7 @@
   - Linux: placeholder (biometry не стандартизирована).
 - **Remote Wipe:**
   - Owner может отправить команду `remote_wipe(device_id)` через P2P Mesh.
-  - Устройство получает команду → zeroize всех ключей → удаление core.db → reboot.
+  - Устройство получает команду → zeroize всех ключей → удаление WORKSPACE.db → reboot.
   - **Confirmation:** wipe требует подтверждение через второй фактор (recovery phrase) на устройстве-инициаторе.
 
 ### 26.5 Secure Transaction API
@@ -88,11 +88,11 @@
 | Incognito | Аноним | Открыть Incognito → RAM-only, no sync |
 
 ## Интеграция с будущими этапами
-- **Вход:** этап 10 (Core) — SQLite, event loop.
+- **Вход:** этап 10 (WORKSPACE) — SQLite, event loop.
 - **Вход:** этап 11 (Security base) — capability model.
 - **Вход:** этап 18 (Backup) — recovery phrase, encryption.
 - **Выход:** `checkRole()` → этап 12 (VFS), 14 (Project Manager), 19 (App Registry).
-- **Выход:** audit log → этап 27 (Core.Backoffice) для просмотра.
+- **Выход:** audit log → этап 27 (Workspace.Backoffice) для просмотра.
 - **Выход:** Key Manager → этап 17 (P2P) для WireGuard keys.
 
 ## Критерии приёмки

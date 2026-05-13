@@ -1,4 +1,4 @@
-# Этап 32 — Game Mode & Energy Manager
+﻿# Этап 32 — Game Mode & Energy Manager
 
 ## Цель
 Создать системные режимы: Game Mode (прямой доступ к GPU для приложений) и Energy Manager (управление энергопотреблением). После этого этапа пользователь может играть в игры с максимальной производительностью, а система автоматически экономит батарею.
@@ -20,7 +20,7 @@
 ## Требования
 
 ### 32.1 Game Mode
-- **API:** `core.game.requestMode()` — запрос перехода в Game Mode (только level 4–5 приложения).
+- **API:** `WORKSPACE.game.requestMode()` — запрос перехода в Game Mode (только level 4–5 приложения).
 - **Direct Surface:** Display Server создаёт dedicated surface без compositor. Приложение рендерит напрямую в swapchain.
 - **Input Exclusivity:** все вводы (клавиатура, мышь, геймпад) направляются напрямую в приложение.
 - **Shadow Framebuffer:** перед входом в Game Mode — capture текущего framebuffer в GPU texture. При выходе (Panic Gesture, Alt+Tab) — мгновенное отображение shadow.

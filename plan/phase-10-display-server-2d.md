@@ -10,7 +10,7 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 9** — Display Server: Core (GPU device, queue, render pipeline, swapchain).
+- **Этап 9** — Display Server: WORKSPACE (GPU device, queue, render pipeline, swapchain).
 
 ## Часть системы
 **Level 3 — Display Server** [См. layer-8 §3.1–3.4, layer-1 §3, layer-11 §UI]
@@ -52,21 +52,21 @@
 | Функция | Описание | Тест |
 |---------|----------|------|
 | Rounded rect | Скруглённые углы | Рендер → визуально скруглено |
-| Text "Hello CORE" | Латиница | Рендер → читаемый текст |
+| Text "Hello WORKSPACE" | Латиница | Рендер → читаемый текст |
 | Text "Привет" | Кириллица | Рендер → читаемый текст |
 | Border + shadow | Стилизация | Рендер → граница и тень видны |
 | 100 buttons | Instancing | 100 кнопок → < 5 draw calls |
 | Image display | PNG | Загрузить PNG → отображается |
 
 ## Интеграция с будущими этапами
-- **Вход:** этап 7 (Core) — GPU device, queue, swapchain.
+- **Вход:** этап 7 (WORKSPACE) — GPU device, queue, swapchain.
 - **Выход:** 2D primitive API → этап 9 (Compositor) для компоновки окон.
 - **Выход:** text rendering → этап 13 (Command Bar) для отображения текста.
 - **Выход:** image textures → этап 14 (Project Manager) для иконок и превью.
 
 ## Критерии приёмки
 - [ ] Рендерится прямоугольник с border radius 8px.
-- [ ] Текст "Hello CORE" и "Привет, мир!" читаем, без артефактов.
+- [ ] Текст "Hello WORKSPACE" и "Привет, мир!" читаем, без артефактов.
 - [ ] Граница 1px и тень 4px blur визуально корректны.
 - [ ] 100 кнопок рендерятся за < 1 мс (GPU time).
 - [ ] PNG изображение 512×512 загружается и отображается.

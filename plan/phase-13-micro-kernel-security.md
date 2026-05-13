@@ -10,7 +10,7 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 12** — Micro-Kernel: Core (SQLite schema, event loop, IPC).
+- **Этап 12** — Micro-Kernel: WORKSPACE (SQLite schema, event loop, IPC).
 
 ## Часть системы
 **Level 1 — Micro-Kernel: Capability Security** [См. layer-7 §22, layer-8 §4.4, layer-6 §3]

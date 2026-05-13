@@ -11,7 +11,7 @@
 
 ## Зависимости
 - **Этап 8** — Host Shim: Network (TCP/UDP, WireGuard туннель, P2P Transport API).
-- **Этап 12** — Micro-Kernel: Core (event loop, SQLite).
+- **Этап 12** — Micro-Kernel: WORKSPACE (event loop, SQLite).
 - **Этап 19** — CRDT Engine (операции для синхронизации).
 
 ## Часть системы
@@ -34,7 +34,7 @@
 - **WireGuard handshake:** при обнаружении пира устройства обмениваются публичными ключами WireGuard через сигнальный канал (mDNS или relay).
 - **STUN:** определение внешнего IP и порта для NAT traversal.
 - **Hole punching:** UDP hole punching для прямого соединения через NAT.
-- **TURN relay:** fallback если прямое соединение невозможно. Relay-серверы CORE (публичные bootstrap nodes) пересылают трафик. Relay — последняя инстанция, не основной путь.
+- **TURN relay:** fallback если прямое соединение невозможно. Relay-серверы WORKSPACE (публичные bootstrap nodes) пересылают трафик. Relay — последняя инстанция, не основной путь.
 - **Connection state:** `disconnected` → `discovered` → `handshaking` → `connected` → `syncing` → `synced`.
 
 ### 17.4 libp2p Integration

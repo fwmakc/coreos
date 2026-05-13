@@ -12,7 +12,7 @@
 ## Зависимости
 - **Этап 11** — Display Server: Compositor (текстура для embedding webview).
 - **Этап 13** — Micro-Kernel: Security (capability checks для web-контента).
-- **Этап 22** — App Registry (core.json для level 1–2 приложений).
+- **Этап 22** — App Registry (workspace.json для level 1–2 приложений).
 - **Этап 23** — V8 Isolate Runtime (shared sandbox infrastructure).
 
 ## Часть системы
@@ -45,17 +45,17 @@
 ### 21.3 Sandbox
 - **Process isolation:** WebView запускается в отдельном процессе (renderer process) от основного процесса Workspace.
 - **Network sandbox:** WebView имеет доступ только к `http/https`. Доступ к `file://` запрещён (за исключением sandboxed app bundle).
-- **Capability bridge:** WebView не имеет прямого доступа к `@core/*` API. Взаимодействие через `postMessage` bridge:
-  - WebView: `window.parent.postMessage({ type: 'core:fs:read', path: '...' }, '*')`
+- **Capability bridge:** WebView не имеет прямого доступа к `@workspace/*` API. Взаимодействие через `postMessage` bridge:
+  - WebView: `window.parent.postMessage({ type: 'WORKSPACE:fs:read', path: '...' }, '*')`
   - Workspace: проверка capability → выполнение → `postMessage` обратно с результатом.
 - **Cookie isolation:** cookies WebView не пересекаются с системой и между разными Island Mode окнами (если не настроено иначе).
 
-### 21.4 core.json Integration (Level 1–2)
-- **Level 1:** "Как есть" — просто URL. Нет манифеста, нет `@core` доступа.
-- **Level 2:** "Манифест" — `core.json` + URL. Приложение может запрашивать capabilities через `postMessage` bridge. Установка = создание ярлыка с URL и манифестом.
+### 21.4 workspace.json Integration (Level 1–2)
+- **Level 1:** "Как есть" — просто URL. Нет манифеста, нет `@WORKSPACE` доступа.
+- **Level 2:** "Манифест" — `workspace.json` + URL. Приложение может запрашивать capabilities через `postMessage` bridge. Установка = создание ярлыка с URL и манифестом.
 
 ### 21.5 DevTools
-- **Remote DevTools:** для разработки — подключение Chrome DevTools к WebView через remote debugging port (опционально, включается флагом `--core-dev`).
+- **Remote DevTools:** для разработки — подключение Chrome DevTools к WebView через remote debugging port (опционально, включается флагом `--workspace-dev`).
 - **Inspector overlay:** нажатие F12 в dev-режиме открывает DevTools в отдельном окне.
 
 ### 21.6 Error Handling
@@ -70,7 +70,7 @@
 | Open URL | Открыть сайт | Открыть example.com → страница загружена |
 | Input forward | Ввод | Нажать клавишу внутри Island → WebView получает |
 | Scroll | Скролл | Скролл колесом → страница скроллится |
-| postMessage bridge | @core API | Вызвать `core:fs:read` → capability check → результат |
+| postMessage bridge | @WORKSPACE API | Вызвать `WORKSPACE:fs:read` → capability check → результат |
 | Screenshot | Скриншот | Запросить capture → PNG получен |
 | DevTools | Отладка | F12 → DevTools подключены |
 | Process isolation | Процесс | WebView renderer — отдельный PID |
@@ -78,16 +78,16 @@
 ## Интеграция с будущими этапами
 - **Вход:** этап 9 (Compositor) — shared texture compositing.
 - **Вход:** этап 11 (Security) — capability checks для bridge.
-- **Вход:** этап 19 (App Registry) — level 1–2 apps, core.json.
+- **Вход:** этап 19 (App Registry) — level 1–2 apps, workspace.json.
 - **Вход:** этап 20 (V8 Isolate) — shared sandbox infrastructure, permissions UI.
 - **Выход:** `postMessage` → этап 20 (V8 Isolate API bridge).
 - **Выход:** screenshot → этап 24 (Voice, Zero UI: "отправь скриншот").
 
 ## Критерии приёмки
-- [ ] Открытие URL: страница загружается, рендерится в окне CORE.
+- [ ] Открытие URL: страница загружается, рендерится в окне WORKSPACE.
 - [ ] Input forwarding: клавиатура и мышь работают внутри WebView.
 - [ ] Scroll: smooth scroll через тачпад/колесо.
-- [ ] postMessage bridge: запрос `core:fs:read` с правом — успех, без права — отказ.
+- [ ] postMessage bridge: запрос `WORKSPACE:fs:read` с правом — успех, без права — отказ.
 - [ ] Screenshot: PNG корректного размера.
 - [ ] DevTools: подключение работает в dev-режиме.
 - [ ] Process isolation: renderer process — отдельный PID (проверка через task manager).

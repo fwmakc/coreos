@@ -5,7 +5,7 @@
 
 ## Язык и стек
 - **Язык:** Rust
-- **Ключевые зависимости:** `winit` (бэкенд `uikit` / `appkit` для iOS), `core-foundation`, `core-graphics`, `objc` crate (для Objective-C runtime вызовов)
+- **Ключевые зависимости:** `winit` (бэкенд `uikit` / `appkit` для iOS), `WORKSPACE-foundation`, `WORKSPACE-graphics`, `objc` crate (для Objective-C runtime вызовов)
 - **Целевая ОС:** iOS 15+ (iPhone, iPad, ARM64)
 
 ## Зависимости
@@ -25,7 +25,7 @@
 - **Ориентация:** portrait, landscape, auto-rotate. iPad — все ориентации. iPhone — portrait по умолчанию (настраивается).
 - **Multi-window (iPad):** Stage Manager, Split View. Workspace адаптирует layout при изменении размера окна.
 - **Safe Area:** учёт safe area (notch, dynamic island, home indicator). Display Server получает safe insets.
-- **Status Bar:** скрыт в полноэкранном режиме CORE, показывается при свайпе сверху (системное поведение iOS).
+- **Status Bar:** скрыт в полноэкранном режиме WORKSPACE, показывается при свайпе сверху (системное поведение iOS).
 
 ### 5.2 Ввод с тачскрина
 - **Touch:** `UITouch` events через `winit` — `Began`, `Moved`, `Ended`, `Cancelled`.
@@ -37,13 +37,13 @@
 ### 5.3 Ввод с клавиатуры
 - **Software keyboard:** `UIKeyboardWillShowNotification` / `WillHideNotification`. Host Shim сообщает Display Server размер клавиатуры для inset.
 - **Hardware keyboard:** Magic Keyboard / Smart Keyboard Folio. Полная поддержка раскладок, модификаторов (Command, Option, Control, Shift).
-- **Cmd+Tab:** в полноэкранном режиме CORE — открывает Command Bar (как на macOS).
+- **Cmd+Tab:** в полноэкранном режиме WORKSPACE — открывает Command Bar (как на macOS).
 
 ### 5.4 Системные жесты
-- **Home Indicator (свайп снизу):** **Panic Gesture** — выход из CORE в iOS SpringBoard [См. layer-4 §5.3].
-- **Control Center (свайп сверху-вправо/вниз):** работает всегда, CORE не перехватывает системные свайпы.
+- **Home Indicator (свайп снизу):** **Panic Gesture** — выход из WORKSPACE в iOS SpringBoard [См. layer-4 §5.3].
+- **Control Center (свайп сверху-вправо/вниз):** работает всегда, WORKSPACE не перехватывает системные свайпы.
 - **Notification Center (свайп сверху-влево/вниз):** работает всегда.
-- **App Switcher (свайп снизу + удержание):** показывает iOS app switcher. CORE отображается с живым snapshot.
+- **App Switcher (свайп снизу + удержание):** показывает iOS app switcher. WORKSPACE отображается с живым snapshot.
 - **Back (свайп слева направо):** обрабатывается как `Back` или `Escape` в приложении.
 
 ### 5.5 Аудио (AVAudioEngine)
@@ -83,7 +83,7 @@
 
 | Функция | Описание | Тест |
 |---------|----------|------|
-| UIKit launch | Запуск | Установить → CORE открывается |
+| UIKit launch | Запуск | Установить → WORKSPACE открывается |
 | Touch | Тачскрин | Коснуться → TouchDown с координатами |
 | Soft keyboard | IME | Тап в текстовое поле → клавиатура появляется |
 | Home swipe | Panic Gesture | Свайп снизу → выход на SpringBoard |

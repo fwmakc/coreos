@@ -1,4 +1,4 @@
-# Этап 21 — Backup Engine
+﻿# Этап 21 — Backup Engine
 
 ## Цель
 Создать подсистему резервного копирования 3-2-1: локальные бэкапы на USB, облачные бэкапы на S3-совместимые хранилища, и P2P-бэкапы на доверенные устройства. После этого этапа пользователь может восстановить все данные после потери устройства.
@@ -27,7 +27,7 @@
 - **Custom:** SFTP, WebDAV, Samba — через plugins (placeholder).
 
 ### 18.2 Backup Format
-- **Snapshot:** полная копия `core.db` (SQLite) + все blob'ы из `blobs/`.
+- **Snapshot:** полная копия `WORKSPACE.db` (SQLite) + все blob'ы из `blobs/`.
 - **Incremental:** только новые/изменённые blob'ы (определяются по CID: если CID уже есть в backup — пропускается).
 - **Deduplication:** backup хранит blob'ы по CID (как VFS). Одинаковые файлы не дублируются.
 - **Encryption:** AES-256-GCM с ключом, derived from recovery phrase (этап 26). Каждый blob шифруется отдельно.
@@ -65,7 +65,7 @@
   1. Загрузка `backup.manifest`.
   2. Проверка целостности всех CID (BLAKE3).
   3. Расшифровка blob'ов.
-  4. Восстановление `core.db`.
+  4. Восстановление `WORKSPACE.db`.
   5. Replay oplog (для incremental).
   6. Rebuild индексы (FTS5, tag graph).
 - **Partial restore:** восстановление отдельного проекта или Space (не всего устройства).
@@ -84,7 +84,7 @@
 | Full backup USB | Полный бэкап | Запустить → файлы записаны на USB |
 | Incremental S3 | Инкрементальный | Изменить файл → только новый CID загружен |
 | P2P backup | На доверенное устройство | Запустить → blob'ы переданы по WG |
-| Restore | Восстановление | Удалить core.db → восстановить → данные на месте |
+| Restore | Восстановление | Удалить WORKSPACE.db → восстановить → данные на месте |
 | Encrypted backup | Шифрование | Попытка прочитать blob без ключа → мусор |
 | Partial restore | Проект | Восстановить только один проект → остальные не тронуты |
 | Recovery phrase | Генерация | First run → 24 слова показаны пользователю |
@@ -98,11 +98,11 @@
 - **Вход:** этап 26 (Key Manager) — recovery phrase derivation.
 
 ## Критерии приёмки
-- [ ] Full backup на USB: все blob'ы и core.db записаны, manifest создан.
+- [ ] Full backup на USB: все blob'ы и WORKSPACE.db записаны, manifest создан.
 - [ ] Incremental backup: только новые CID (< 1% данных при типичном использовании).
 - [ ] S3 upload: multipart, checksum, client-side encryption.
 - [ ] P2P backup: blob'ы переданы на доверенное устройство.
-- [ ] Restore: после удаления core.db восстановление возвращает все данные.
+- [ ] Restore: после удаления WORKSPACE.db восстановление возвращает все данные.
 - [ ] Encrypted blob: без recovery phrase чтение невозможно.
 - [ ] Partial restore: восстановление одного проекта не затрагивает другие.
 - [ ] Recovery phrase: BIP-39, 24 слова, derivation работает.

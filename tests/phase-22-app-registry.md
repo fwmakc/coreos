@@ -1,6 +1,6 @@
-# Тесты: Этап 22 — App Registry
+﻿# Тесты: Этап 22 — App Registry
 
-> Install/update/remove, `core.json` validation, Ed25519 signatures, dependency resolution, sandbox. Все тесты на реальных приложениях.
+> Install/update/remove, `workspace.json` validation, Ed25519 signatures, dependency resolution, sandbox. Все тесты на реальных приложениях.
 
 ---
 
@@ -12,23 +12,23 @@
 - App зарегистрирована. `apps/` и SQLite.
 **Автоматизация:** автоматический.
 
-### TC-22-002: Install — `core.json` valid
+### TC-22-002: Install — `workspace.json` valid
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
-1. Valid `core.json`: name, version, entry, permissions.
+1. Valid `workspace.json`: name, version, entry, permissions.
 **Ожидаемый результат:**
 - Успешно.
 **Автоматизация:** автоматический.
 
-### TC-22-003: Install — `core.json` missing name
+### TC-22-003: Install — `workspace.json` missing name
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
-1. `core.json` без `name`.
+1. `workspace.json` без `name`.
 **Ожидаемый результат:**
 - `ValidationError: missing field 'name'`.
 **Автоматизация:** автоматический.
 
-### TC-22-004: Install — `core.json` invalid version
+### TC-22-004: Install — `workspace.json` invalid version
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
 1. version = "not-a-version".
@@ -36,7 +36,7 @@
 - `ValidationError: invalid semver`.
 **Автоматизация:** автоматический.
 
-### TC-22-005: Install — `core.json` invalid permissions
+### TC-22-005: Install — `workspace.json` invalid permissions
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
 1. permissions = ["invalid:capability"].

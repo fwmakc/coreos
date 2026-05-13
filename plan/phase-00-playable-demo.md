@@ -31,7 +31,7 @@
 ## Зависимости
 
 - Phase 1 (Host Shim Windows) — переиспользуем `host_shim` crate, но без полной абстракции `HostBackend`. Демо напрямую работает с winit/wgpu.
-- Phase 9 (Display Server Core) — частично переиспользуем `display_server` crate, но в упрощённом виде.
+- Phase 9 (Display Server WORKSPACE) — частично переиспользуем `display_server` crate, но в упрощённом виде.
 
 **Важно:** Phase 0 — это **одноразовый прототип**. Код демо **не эволюционирует** в продукт. После завершения Phase 0 код демо архивируется в `archive/demo/`, а уроки интегрируются в Phase 1–11.
 

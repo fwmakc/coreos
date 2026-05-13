@@ -142,7 +142,7 @@ cargo clippy -- -D warnings
 | Host Shim        | Rust               | Window, input, GPU, audio, files, net|
 | Display Server   | Rust (wgpu, WGSL)  | WebGPU rendering & compositing       |
 | Micro-Kernel     | Bun (TypeScript)   | IPC, SQLite, capability security     |
-| App Runtime      | V8 Isolates        | Sandboxed apps with `@core/*` API    |
+| App Runtime      | V8 Isolates        | Sandboxed apps with `@workspace/*` API    |
 | Island Mode      | CEF / WebKit       | Web content & legacy app embedding   |
 | AI Engine        | Bun + ONNX/Ollama  | ASR, SLM, TTS, embeddings            |
 | P2P / Sync       | Bun + Rust         | Mesh networking, CRDT, WireGuard     |

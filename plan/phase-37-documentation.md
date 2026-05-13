@@ -26,11 +26,11 @@
 
 ### 37.2 Developer Documentation
 - **Architecture Overview:** 5-уровневая архитектура, data flow diagrams, component diagram.
-- **App Model:** 5 уровней интеграции, `core.json` schema, `@core/*` API reference.
+- **App Model:** 5 уровней интеграции, `workspace.json` schema, `@workspace/*` API reference.
 - **Intent API:** Intent structure, parser rules, handler registration, Generative UI.
 - **P2P Protocol:** WireGuard handshake, CRDT sync protocol, Merkle Search Trees, signaling.
 - **Contributing Guide:** code style, commit conventions, PR process, code review checklist.
-- **Local Development:** `core-dev` CLI, debugging, dev tools, simulator.
+- **Local Development:** `workspace-dev` CLI, debugging, dev tools, simulator.
 
 ### 37.3 Admin Documentation
 - **Installation Guide:** system requirements, deployment scenarios (personal, corporate, bare metal).
@@ -41,13 +41,13 @@
 
 ### 37.4 API Reference
 - **Intent API Reference:** все actions, params, examples.
-- **App Manifest (`core.json`):** full schema, validation rules, examples for each level.
+- **App Manifest (`workspace.json`):** full schema, validation rules, examples for each level.
 - **P2P RPC:** protocol buffers / binary format, endpoints, auth.
 - **Rust API (`HostBackend`, `DisplayServer`):** rustdoc generated.
-- **TypeScript API (`@core/*`):** typedoc generated.
+- **TypeScript API (`@workspace/*`):** typedoc generated.
 
 ### 37.5 Docs Infrastructure
-- **Static Site:** docs site (docs.core.app или GitHub Pages), search, versioning (v1.0, v1.1, latest).
+- **Static Site:** docs site (docs.WORKSPACE.app или GitHub Pages), search, versioning (v1.0, v1.1, latest).
 - **Search:** full-text search across all docs (Algolia or local FTS).
 - **Versioning:** каждый release — отдельная версия документации. Latest — main branch.
 - **I18n:** русский (primary), английский (secondary). Другие языки — community translations.
@@ -72,7 +72,7 @@
 - [ ] User docs: getting started, voice, security, troubleshooting — полнота.
 - [ ] Developer docs: architecture, app model, Intent API, P2P — полнота.
 - [ ] Admin docs: installation, Backoffice, Hardcore, hardening — полнота.
-- [ ] API reference: Intent API, core.json, P2P RPC, @core/* — полнота.
+- [ ] API reference: Intent API, workspace.json, P2P RPC, @workspace/* — полнота.
 - [ ] Docs site: работает, поиск работает, versioning работает.
 - [ ] Новый разработчик разворачивает систему за 1 день по docs.
 - [ ] Новый пользователь осваивает базовые функции за 15 минут.

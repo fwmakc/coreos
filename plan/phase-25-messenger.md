@@ -10,10 +10,10 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 12** — Micro-Kernel: Core (SQLite, event loop).
+- **Этап 12** — Micro-Kernel: WORKSPACE (SQLite, event loop).
 - **Этап 19** — CRDT Engine (операционный журнал для сообщений).
 - **Этап 20** — P2P Mesh (транспорт, обнаружение пиров).
-- **Этап 22** — App Registry (core.messenger как system app).
+- **Этап 22** — App Registry (WORKSPACE.messenger как system app).
 
 ## Часть системы
 **Level 1 — Бэк: Chat Engine** [См. layer-8 §6, layer-1 §5, layer-3 §1.3]
@@ -55,12 +55,12 @@
 - **Priority:** сообщения от контактов с высоким приоритетом пробуждают устройство (WOL через P2P, опционально).
 - **Mute:** возможность отключить уведомления для conversation или на время (1 час, 8 часов, до утра).
 
-### 22.6 UI (core.messenger)
+### 22.6 UI (WORKSPACE.messenger)
 - **Список чатов:** слева, с preview последнего сообщения, timestamp, unread count.
 - **История сообщений:** справа, с датами, аватарами, статусами.
 - **Ввод:** текстовое поле с поддержкой markdown (bold, italic, code).
 - **Поиск:** поиск по истории (FTS5).
-- **Рендеринг:** через `@core/ui` (этап 20) → Display Server (этап 9).
+- **Рендеринг:** через `@workspace/ui` (этап 20) → Display Server (этап 9).
 
 ## Ключевые функции
 
@@ -77,7 +77,7 @@
 ## Интеграция с будущими этапами
 - **Вход:** этап 16 (CRDT) — операционный журнал, Causal Trees.
 - **Вход:** этап 17 (P2P) — transport, GossipSub, store-and-forward.
-- **Вход:** этап 19 (App Registry) — core.messenger как system app.
+- **Вход:** этап 19 (App Registry) — WORKSPACE.messenger как system app.
 - **Выход:** сообщения → этап 24 (Voice, Zero UI: "прочитай сообщение").
 - **Выход:** уведомления → этап 15 (Window Manager, Overlay Layer).
 

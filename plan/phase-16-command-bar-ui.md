@@ -1,4 +1,4 @@
-# Этап 16 — Command Bar: UI
+﻿# Этап 16 — Command Bar: UI
 
 ## Цель
 Создать визуальный интерфейс Command Bar — рендеринг строки ввода, suggestions, анимаций, и интеграцию с Display Server. После этого этапа Command Bar отображается на экране как Overlay Layer с полным визуальным оформлением.
@@ -6,7 +6,7 @@
 ## Язык и стек
 - **Язык:** TypeScript
 - **Runtime:** Bun
-- **Ключевые зависимости:** `@core/ui` (компоненты: View, Text, TextInput, ScrollView, Button), `bun:sqlite` (кэш иконок приложений)
+- **Ключевые зависимости:** `@workspace/ui` (компоненты: View, Text, TextInput, ScrollView, Button), `bun:sqlite` (кэш иконок приложений)
 - **Целевые ОС:** Windows, macOS, Linux, Android, iOS
 
 ## Зависимости
@@ -30,7 +30,7 @@
 ### 16.2 Компоненты UI
 - **Input Field:** однострочное поле ввода. Шрифт системный (15–17 pt), цвет — `theme.text.primary`. Placeholder — `theme.text.tertiary`.
 - **Suggestion List:** вертикальный ScrollView под input field. Каждый item:
-  - Иконка (24×24, из `@core/icons` или приложения).
+  - Иконка (24×24, из `@workspace/icons` или приложения).
   - Title (основной текст, bold если exact match).
   - Subtitle (дополнительная информация: путь файла, описание команды).
   - Shortcut hint (справа, `Ctrl+Enter`, `Tab` — если есть).

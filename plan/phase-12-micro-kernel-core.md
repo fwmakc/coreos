@@ -1,4 +1,4 @@
-﻿# Этап 12 — Micro-Kernel: Core & IPC
+﻿# Этап 12 — Micro-Kernel: WORKSPACE & IPC
 
 ## Цель
 Создать ядро системы на TypeScript/Bun: runtime, IPC-мост с Host Shim, SQLite-схему данных, и базовый event loop. После этого этапа Workspace имеет работающий бэкенд, который получает события от Host Shim, хранит данные в SQLite, и может запускать простейшие скрипты.
@@ -14,7 +14,7 @@
 - **Этап 1–3** — Host Shim: Window (события ввода).
 - **Этап 6** — Host Shim: Audio (event loop интеграция).
 - **Этап 8** — Host Shim: Network (транспорт для IPC).
-- **Этап 9** — Display Server: Core (surface, GPU — для будущей интеграции).
+- **Этап 9** — Display Server: WORKSPACE (surface, GPU — для будущей интеграции).
 
 ## Часть системы
 **Level 1 — Micro-Kernel** [См. layer-8 §4, layer-3 §1, layer-4 §2]
@@ -41,7 +41,7 @@ Micro-Kernel — это сердце Workspace. Он управляет всей
   - `WindowCommand` (set title, resize, set cursor)
 
 ### 10.2 SQLite Schema
-- База данных `core.db` в `WORKSPACE_ROOT/`.
+- База данных `WORKSPACE.db` в `WORKSPACE_ROOT/`.
 - **Таблицы (первая версия):**
   - `profiles` — профили пользователей (id, name, avatar, created_at).
   - `spaces` — контексты жизни (id, name, profile_id, color).
@@ -60,13 +60,13 @@ Micro-Kernel — это сердце Workspace. Он управляет всей
 - **Graceful shutdown:** при получении `PanicExit` от Host Shim — сохранить checkpoint (projects, settings), закрыть SQLite, выйти.
 
 ### 10.4 Configuration & Bootstrap
-- `core.toml` — конфигурация ядра (пути, логи, уровень безопасности).
+- `WORKSPACE.toml` — конфигурация ядра (пути, логи, уровень безопасности).
 - `WORKSPACE_ROOT` определяется автоматически:
   - Windows: `%LOCALAPPDATA%\Workspace\`
   - macOS: `~/Library/Application Support/Workspace/`
   - Linux: `~/.local/share/Workspace/`
-  - Android: `/data/data/app.core/files/`
-- First-run detection: если `core.db` отсутствует — создать дефолтный профиль, дефолтный Space "Personal", дефолтный Project "Inbox".
+  - Android: `/data/data/app.WORKSPACE/files/`
+- First-run detection: если `WORKSPACE.db` отсутствует — создать дефолтный профиль, дефолтный Space "Personal", дефолтный Project "Inbox".
 
 ### 10.5 Логирование
 - Структурированные логи в JSON.
@@ -79,11 +79,11 @@ Micro-Kernel — это сердце Workspace. Он управляет всей
 | Функция | Описание | Тест |
 |---------|----------|------|
 | IPC ping | Bun → Rust → Bun | Отправить ping → получить pong за < 1 мс |
-| SQLite create | Создание БД | First run → `core.db` создан, таблицы есть |
+| SQLite create | Создание БД | First run → `WORKSPACE.db` создан, таблицы есть |
 | Insert profile | Запись в БД | Создать профиль → `SELECT` возвращает его |
 | Event loop | Обработка сообщений | 1000 input events/сек → без потерь |
 | Panic shutdown | Graceful exit | PanicExit → БД закрыта, лог записан |
-| Config load | Чтение core.toml | Создать toml → настройки загружены |
+| Config load | Чтение WORKSPACE.toml | Создать toml → настройки загружены |
 
 ## Интеграция с будущими этапами
 - **Вход:** этап 1–6 (Host Shim) — события ввода, аудио, хранилища, сети через IPC.
@@ -98,7 +98,7 @@ Micro-Kernel — это сердце Workspace. Он управляет всей
 - [ ] CRUD операции с профилями работают.
 - [ ] 1000 input events/сек обрабатываются без потерь (измеряется счётчиком).
 - [ ] PanicExit закрывает БД корректно (проверка через WAL checkpoint).
-- [ ] core.toml загружается и применяется.
+- [ ] WORKSPACE.toml загружается и применяется.
 
 ## Ссылки
 - [layer-3-system-split.md](../layers/layer-3-system-split.md) — Фронт/Бэк разделение, IPC

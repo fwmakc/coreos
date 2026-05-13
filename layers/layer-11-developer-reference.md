@@ -44,7 +44,7 @@
 2. Search Index — файлы, проекты (FTS5 + OCR)
 3. Contact Book — люди, email, номера
 4. History — недавние действия пользователя
-5. Intent Map — зарегистрированные команды приложений (`@core/intents`)
+5. Intent Map — зарегистрированные команды приложений (`@workspace/intents`)
 
 **Ранжирование:**
 1. Точное совпадение имени приложения
@@ -84,7 +84,7 @@
 Ввод → Math Parser (Level 1, встроенный модуль)
      → Результат: строка с красивой нотацией (MathML → WebGPU текст)
      → История: SQLite calculations(project_id, expression, result)
-     → "Построить график" → App: Calculator (V8 Isolate, @core/graphics)
+     → "Построить график" → App: Calculator (V8 Isolate, @workspace/graphics)
 ```
 
 #### 5. Терминал
@@ -162,7 +162,7 @@ interface ShellSettings {
 | Тир | Технология | Ресурсы | Когда работает |
 |-----|-----------|---------|----------------|
 | Base Tier | Rule-based + lightweight NLP + FTS5 | 16 MB RAM, no GPU | Всегда |
-| Full Tier | Semantic Kernel + векторный поиск (embeddings) | GPU/NPU | Core.Mind включён |
+| Full Tier | Semantic Kernel + векторный поиск (embeddings) | GPU/NPU | Workspace.Mind включён |
 
 **Словари Intents:** `"открой"`, `"найди"`, `"переключи"`, `"создай"`, `"отправь"`, `"покажи"`.
 
@@ -176,9 +176,9 @@ interface ShellSettings {
 ### 2.4 Action Executor
 
 **Каналы исполнения:**
-1. **Intent API вызов:** `Core.Notes.create_note({ content, project })`
+1. **Intent API вызов:** `Workspace.Notes.create_note({ content, project })`
 2. **Системный вызов:** изменение настроек, управление окнами
-3. **Generative UI:** генерация JS-виджета в Level 5 sandbox → отрисовка через `@core/graphics`
+3. **Generative UI:** генерация JS-виджета в Level 5 sandbox → отрисовка через `@workspace/graphics`
 4. **Cloud Bridge:** прокси к облачным LLM (OpenAI-compatible API)
 
 ### 2.5 Response Formatter
@@ -186,7 +186,7 @@ interface ShellSettings {
 **Форматы ответа:**
 - Текст в Command Bar
 - TTS (Piper / Coqui, <100 мс)
-- UI-виджет (временный, через `@core/graphics`)
+- UI-виджет (временный, через `@workspace/graphics`)
 - Безмолвное действие
 
 ### 2.6 Generative UI Engine
@@ -194,7 +194,7 @@ interface ShellSettings {
 ```
 Intent → Semantic Kernel собирает данные
        → Генерация JS-кода в Level 5 sandbox
-       → Отрисовка временного виджета через @core/graphics
+       → Отрисовка временного виджета через @workspace/graphics
        → Пример: "Покажи график трат на кофе за год"
 ```
 
@@ -229,7 +229,7 @@ Intent → Semantic Kernel собирает данные
 
 - Whisper, SLM, TTS, Ollama — каждый в отдельном процессе или V8 Isolate
 - Нет прямого доступа к VFS, SQLite, сети (кроме Cloud Bridge через прокси)
-- Доступ только через `@core/*` wrappers
+- Доступ только через `@workspace/*` wrappers
 
 ---
 
@@ -239,8 +239,8 @@ Intent → Semantic Kernel собирает данные
 
 - **Модель:** Whisper small / medium (зависит от железа)
 - **Работает всегда**, даже в играх
-- **Core Pinning:** отдельное ядро CPU или NPU
-- **Wake word:** `"CORE"` / `"Компьютер"` / настраиваемый (3–4 слога)
+- **WORKSPACE Pinning:** отдельное ядро CPU или NPU
+- **Wake word:** `"WORKSPACE"` / `"Компьютер"` / настраиваемый (3–4 слога)
 - **Exclusive Mode (игры):** 0% влияние на игру, результаты → только в наушники (TTS) или overlay
 - **Privacy:** локально, данные не уходят
 
@@ -253,7 +253,7 @@ Intent → Semantic Kernel собирает данные
 ### 3.3 Zero UI
 
 **Примеры команд:**
-- `"Сделай музыку тише"` → `Core.Audio.setVolume(0.5)`
+- `"Сделай музыку тише"` → `Workspace.Audio.setVolume(0.5)`
 - `"Поставь будильник на 7"` → `Scheduler.setAlarm(7:00)`
 - `"Скинь кадр Ване"` → Screenshot → Chat → отправка
 - `"Что по проекту?"` → ИИ сводка → TTS в наушники
@@ -284,7 +284,7 @@ Intent → Semantic Kernel собирает данные
 ### 4.1 Мессенджер
 
 - **Контакты:** SQLite Contact Book (имя, ник, номер, email, платформы)
-- **CORE-контакт:** P2P, CRDT, мгновенно, end-to-end (WireGuard)
+- **WORKSPACE-контакт:** P2P, CRDT, мгновенно, end-to-end (WireGuard)
 - **Внешний контакт:** bridge (Telegram/WhatsApp API, email)
 - **Шифрование:** end-to-end через WireGuard tunnel
 
@@ -296,7 +296,7 @@ Intent → Semantic Kernel собирает данные
 
 ### 4.3 VoIP
 
-- **CORE → CORE:** P2P VoIP (WebRTC через WireGuard)
+- **WORKSPACE → WORKSPACE:** P2P VoIP (WebRTC через WireGuard)
 - **Внешний:** SIP bridge / GSM через провайдера
 - **Аудио:** CPAL (Level 0, Host Shim)
 
@@ -316,8 +316,8 @@ Intent → Semantic Kernel собирает данные
 **Архитектура:**
 1. Пользователь: `"техподдержка"` (голос / Command Bar)
 2. Бэк открывает окно приёма (TTL 10 мин) + код `SUPPORT-9284-6173`
-3. Relay-сервер CORE Corp (NAT traversal) → WireGuard-туннель до Бэка
-4. Бэк проверяет: код валиден? подпись CORE Corp (Ed25519, HSM) верна?
+3. Relay-сервер WORKSPACE Corp (NAT traversal) → WireGuard-туннель до Бэка
+4. Бэк проверяет: код валиден? подпись WORKSPACE Corp (Ed25519, HSM) верна?
 5. Подтверждение пользователя: `"Подтверждённый специалист. Разрешить?"`
 6. Сессия TTL 30 мин, логируется в аудит (категория "system")
 
@@ -334,10 +334,10 @@ Intent → Semantic Kernel собирает данные
 | 1 | «Как есть» | 0 | Island Mode (Chromium) | Cookies / storage | Свободно | Как браузер |
 | 2 | «Манифест» | 5 мин | Island Mode (Chromium) | Cookies / storage | Свободно | Браузер + push |
 | 3 | «Бэк на месте» | 1 день | Island + V8 Isolate (Bun) | App-scoped SQLite + VFS | Whitelist | Изолированный бэкенд |
-| 4 | «@core/*» | 1 неделя | Island Mode | Через `@core/*` (capability) | Через `@core/network` | Только разрешённое |
-| 5 | «Полный натив» | 1 месяц | V8 Isolate (Bun) | Через fs shim (capability) | Через `@core/network` | Только разрешённое |
+| 4 | «@workspace/*» | 1 неделя | Island Mode | Через `@workspace/*` (capability) | Через `@workspace/network` | Только разрешённое |
+| 5 | «Полный натив» | 1 месяц | V8 Isolate (Bun) | Через fs shim (capability) | Через `@workspace/network` | Только разрешённое |
 
-### 5.2 Манифест `core.json` — полная схема
+### 5.2 Манифест `workspace.json` — полная схема
 
 ```json
 {
@@ -378,66 +378,66 @@ Intent → Semantic Kernel собирает данные
 |-----------|---------|--------|------------------------|
 | `notifications` | Push-уведомления Workspace | 2–5 | Да, при первом запуске |
 | `fullscreen` | Полноэкранный режим | 2–5 | Нет |
-| `fs` | Доступ к файлам через `@core/fs` | 4–5 | Да |
+| `fs` | Доступ к файлам через `@workspace/fs` | 4–5 | Да |
 | `contacts` | Доступ к контактам | 4–5 | Да |
-| `network` | Сетевые запросы через `@core/network` | 4–5 | Да |
+| `network` | Сетевые запросы через `@workspace/network` | 4–5 | Да |
 | `voice` | Голосовые команды | 5 | Да |
 | `graphics` | Прямой доступ к WebGPU | 5 | Да |
 | `secure_sign` | Биометрическая подпись | 4–5 | Да, каждый раз |
 
-### 5.4 `@core/*` API (уровни 4–5)
+### 5.4 `@workspace/*` API (уровни 4–5)
 
 ```typescript
 // Данные
 import { readFile, writeFile, readdir } from 'fs'      // перехвачено → Back API
-import { listNotes, createNote, updateNote } from '@core/notes'
-import { addTag, removeTag, getTags } from '@core/tags'
-import { search } from '@core/search'
+import { listNotes, createNote, updateNote } from '@workspace/notes'
+import { addTag, removeTag, getTags } from '@workspace/tags'
+import { search } from '@workspace/search'
 
 // Контакты и коммуникации
-import { findContact, listContacts } from '@core/contacts'
-import { sendMessage } from '@core/messenger'
+import { findContact, listContacts } from '@workspace/contacts'
+import { sendMessage } from '@workspace/messenger'
 
 // Проекты и структура
-import { getProject, listProjects } from '@core/projects'
-import { createTask, listTasks } from '@core/tasks'
+import { getProject, listProjects } from '@workspace/projects'
+import { createTask, listTasks } from '@workspace/tasks'
 
 // Уведомления
-import { notify } from '@core/notifications'
+import { notify } from '@workspace/notifications'
 
 // App-scoped хранилище
-import { db } from '@core/db'   // SQLite, CRDT-синхронизация
+import { db } from '@workspace/db'   // SQLite, CRDT-синхронизация
 
 // Интеграция с системой
-import { registerIntent } from '@core/intents'
+import { registerIntent } from '@workspace/intents'
 
 // Уровень 5 — WebGPU + UI
-import { drawRect, drawText, createTexture } from '@core/graphics'
-import { pushLayout, flexColumn, flexRow } from '@core/layout'
-import { Button, TextInput, List } from '@core/ui'
-import { showDialog, showToast } from '@core/ui'
-import { registerVoiceCommand } from '@core/voice'
-import { onFrame } from '@core/loop'
-import { getMetrics } from '@core/performance'
+import { drawRect, drawText, createTexture } from '@workspace/graphics'
+import { pushLayout, flexColumn, flexRow } from '@workspace/layout'
+import { Button, TextInput, List } from '@workspace/ui'
+import { showDialog, showToast } from '@workspace/ui'
+import { registerVoiceCommand } from '@workspace/voice'
+import { onFrame } from '@workspace/loop'
+import { getMetrics } from '@workspace/performance'
 ```
 
 ### 5.5 UI-фреймворк (уровень 5)
 
 | Уровень | API | Назначение |
 |---------|-----|-----------|
-| A | `@core/graphics` | Прямой WebGPU. VR, 3D-редакторы, игры |
-| B | `@core/shell` | Управление окнами, фокусом, слоями |
-| C | `@core/ui` | Готовые компоненты (Button, TextInput, Card). Автоматическая адаптация под тему |
+| A | `@workspace/graphics` | Прямой WebGPU. VR, 3D-редакторы, игры |
+| B | `@workspace/shell` | Управление окнами, фокусом, слоями |
+| C | `@workspace/ui` | Готовые компоненты (Button, TextInput, Card). Автоматическая адаптация под тему |
 
 ### 5.6 App Registry
 
 **Хранение:**
 ```
-~/.core/apps/
+~/.WORKSPACE/apps/
 ├── system/                        ← системные приложения (встроены)
 ├── installed/                     ← установленные приложения
 │   ├── com.todoapp@1.2.0/
-│   │   ├── core.json
+│   │   ├── workspace.json
 │   │   ├── frontend/
 │   │   ├── backend/               ← если level 3
 │   │   ├── data.db                ← app-scoped SQLite
@@ -450,17 +450,17 @@ import { getMetrics } from '@core/performance'
 | Уровень | Как устанавливается |
 |---------|-------------------|
 | 1 | Набрал URL → закрепил. Файлы не скачиваются |
-| 2 | Набрал URL → Workspace нашёл `core.json` → добавил в каталог |
+| 2 | Набрал URL → Workspace нашёл `workspace.json` → добавил в каталог |
 | 3–5 | Скачал из каталога / по адресу → код в `installed/` |
 
-**Магазин:** `pkg.core.app` — подпись Ed25519, обновления автоматические.
+**Магазин:** `pkg.workspace.app` — подпись Ed25519, обновления автоматические.
 
 ### 5.7 App-scoped SQLite
 
 ```typescript
 import { Database } from 'bun:sqlite'
 const db = new Database('data.db')  // автоматически app-scoped
-// Путь: ~/.core/apps/<app_id>/data.db
+// Путь: ~/.WORKSPACE/apps/<app_id>/data.db
 // Изолирована, синхронизируется через CRDT, бэкапится
 ```
 
@@ -534,7 +534,7 @@ Warm Recovery → восстановление из checkpoint за <100 мс
 
 | Тип | Условие | Действие |
 |-----|---------|----------|
-| Memory | >85% RAM хост-ОС или >95% RAM CORE | Graceful suspend → checkpoint → kill |
+| Memory | >85% RAM хост-ОС или >95% RAM WORKSPACE | Graceful suspend → checkpoint → kill |
 | CPU | Нет heartbeat 500 мс (Game Mode: 50 мс) или CPU >95% на ядре >5 сек | Kill + Static UI Overlay «Не отвечает» |
 | GPU | GPU fence не возвращается >2 сек | GPU reset (TDR) + recovery |
 | User | Command Bar → «задачи» → «завершить» или Panic Gesture | Мгновенный kill |
@@ -544,7 +544,7 @@ Warm Recovery → восстановление из checkpoint за <100 мс
 ```
 Приложение запрашивает capability "secure_sign"
   → Пользователь подтверждает в Permissions UI
-  → Core.Security.signWithBiometry({ data, key_id, biometry, confirmation_ui })
+  → Workspace.Security.signWithBiometry({ data, key_id, biometry, confirmation_ui })
   → Micro-Kernel: проверка capability и key_id
   → Display Server: WYSIWYS overlay (рендерит система, не приложение)
   → Пользователь: biometric prompt
@@ -581,25 +581,25 @@ struct SessionConfig {
 ```
 
 - Проверка каждую минуту: idle > auto_lock → lock screen; total > ttl → logout
-- Owner может принудительно завершить сессию через Core.Hardcore или другой Фронт
+- Owner может принудительно завершить сессию через Workspace.Hardcore или другой Фронт
 - Remote wipe: Бэк отзывает session token → push-уведомление → lock screen + очистка кэша
 
-### 5.16 `core-dev` — Developer CLI
+### 5.16 `workspace-dev` — Developer CLI
 
 ```bash
-core-dev install <url|path>        # установка из Git / локальной директории
-core-dev run <appId> --dev         # dev-режим (auto-reload)
-core-dev logs <appId> --follow     # логи
-core-dev build <appId> --output ./dist/   # сборка bytecode
-core-dev validate core.json        # проверка манифеста
-core-dev publish ./dist/ --registry pkg.core.app
-core-dev check-updates / update / rollback
+workspace-dev install <url|path>        # установка из Git / локальной директории
+workspace-dev run <appId> --dev         # dev-режим (auto-reload)
+workspace-dev logs <appId> --follow     # логи
+workspace-dev build <appId> --output ./dist/   # сборка bytecode
+workspace-dev validate workspace.json        # проверка манифеста
+workspace-dev publish ./dist/ --registry pkg.workspace.app
+workspace-dev check-updates / update / rollback
 ```
 
-### 5.17 `@core/mock`
+### 5.17 `@workspace/mock`
 
-- npm-пакет `npm install @core/mock --save-dev`
-- In-memory реализации `@core/*` API
+- npm-пакет `npm install @workspace/mock --save-dev`
+- In-memory реализации `@workspace/*` API
 - Тестирование вне Workspace (браузер / Node.js)
 - Ограничения: нет CRDT, P2P, WebGPU, реальной безопасности
 
@@ -690,7 +690,7 @@ URL → App Runtime создаёт Island Process
 ### 7.3 Нативные окна (WebGPU)
 
 ```
-Приложение (V8 Isolate) → Core.Graphics API (Level 3)
+Приложение (V8 Isolate) → Workspace.Graphics API (Level 3)
                         → WebGPU Pipeline
                         → Display Server композитит
                         → Effects: blur, transparency, shadows
@@ -732,7 +732,7 @@ URL → App Runtime создаёт Island Process
 | Direct GPU Context | Display Server отдаёт swapchain напрямую приложению (без композитинга) |
 | Raw Input | Host Shim перенаправляет HID events напрямую в Isolate (без Input Router). Исключение: Panic Gesture |
 | Low-latency Audio | CPAL REALTIME (минимальный буфер, exclusive stream) |
-| CPU Affinity | Game thread pinned на dedicated core. SCHED_RR + high priority |
+| CPU Affinity | Game thread pinned на dedicated WORKSPACE. SCHED_RR + high priority |
 | Network Overlay | UDP-based real-time socket. DTLS шифрование |
 
 **Frame Pacing:** target FPS (60/120/144/240). FIFO_RELAXED для VRR. Auto resolution scaling (0.5–1.0).
@@ -769,7 +769,7 @@ URL → App Runtime создаёт Island Process
 | **SQLite (Фронт)** | Command Bar, темы, горячие клавиши, приоритеты уведомлений, accessibility | Пользователь | SQLite |
 | **SQLite (Бэк)** | VFS (passport, tags, versions), RBAC, Audit Store, User Directory, Device Registry | Owner / система | SQLite |
 | **JSON (Бэк)** | AI-модели, Cloud Bridge, backup targets, политики безопасности, компоненты Бэка | Owner / админ | JSON |
-| **JSON (манифест приложения)** | `core.json`: permissions, network_whitelist, update_url | Разработчик | JSON |
+| **JSON (манифест приложения)** | `workspace.json`: permissions, network_whitelist, update_url | Разработчик | JSON |
 | **TPM / Secure Enclave** | Master key, device key, biometric data | Система (Key Manager) | Аппаратный |
 | **RAM (не сохраняется)** | Анонимный профиль, аудио-буфер Whisper | Система | RAM |
 
@@ -813,15 +813,15 @@ URL → App Runtime создаёт Island Process
 | Анонимный профиль | RAM (не сохраняется) | Экран входа → «Анонимный» / Command Bar |
 | Auto-lock (блокировка после N минут простоя) | SQLite (настройки пользователя) | GUI → Настройки → Безопасность |
 | Screen lock + биометрия/PIN | SQLite / TPM / Secure Enclave | Экран входа |
-| Remote wipe (удалённое уничтожение кэша) | Бэк (mesh-реестр device keys) | Core.Backoffice / Core.Hardcore |
-| TTL сессии (30 мин бездействия → logout) | Политика Бэка | Core.Hardcore |
+| Remote wipe (удалённое уничтожение кэша) | Бэк (mesh-реестр device keys) | Workspace.Backoffice / Workspace.Hardcore |
+| TTL сессии (30 мин бездействия → logout) | Политика Бэка | Workspace.Hardcore |
 
 ### 8.5 Приложения — настройки
 
 | Что настраивается | Где хранится | Интерфейс |
 |-------------------|--------------|-----------|
-| Permissions (файлы, сеть, контакты, уведомления, микрофон, камера, `secure_sign`) | Манифест `core.json` + Capability Store (Бэк) | Permissions UI (всплывающее окно) / ПКМ на окно / Command Bar |
-| Блокировка bytecode-приложений (`allow_bytecode_apps`) | Политика Бэка | Core.Backoffice / Core.Hardcore |
+| Permissions (файлы, сеть, контакты, уведомления, микрофон, камера, `secure_sign`) | Манифест `workspace.json` + Capability Store (Бэк) | Permissions UI (всплывающее окно) / ПКМ на окно / Command Bar |
+| Блокировка bytecode-приложений (`allow_bytecode_apps`) | Политика Бэка | Workspace.Backoffice / Workspace.Hardcore |
 | Автообновление приложений | SQLite (настройки пользователя) | GUI → Настройки приложений |
 | Отчёты об ошибках (разрешить/запретить `message`) | SQLite (настройки пользователя) | Диалог ошибки / Command Bar |
 
@@ -837,21 +837,21 @@ URL → App Runtime создаёт Island Process
 
 | Что настраивается | Где хранится | Кто меняет | Интерфейс |
 |-------------------|--------------|------------|-----------|
-| Уровень безопасности (Базовый / Повышенный / Максимальный) | Бэк (Key Manager + конфиг) | Owner | Core.Backoffice / Core.Hardcore |
-| `external_media_allow_export` (запрет экспорта на USB) | Политика Бэка (JSON/SQLite) | Owner | Core.Backoffice / Core.Hardcore |
-| `require_encrypt_export` (шифрование при экспорте) | Политика Бэка | Owner | Core.Backoffice / Core.Hardcore |
-| `allow_import` / `max_import_files` / `max_import_file_size` | Политика Бэка | Owner | Core.Hardcore |
-| `clipboard_allow_export` (`none` / `text` / `all`) | Политика Бэка | Owner | Core.Backoffice / Core.Hardcore |
-| `clipboard_life_time`, `clipboard_persist` | Политика Бэка | Owner | Core.Backoffice / Core.Hardcore |
+| Уровень безопасности (Базовый / Повышенный / Максимальный) | Бэк (Key Manager + конфиг) | Owner | Workspace.Backoffice / Workspace.Hardcore |
+| `external_media_allow_export` (запрет экспорта на USB) | Политика Бэка (JSON/SQLite) | Owner | Workspace.Backoffice / Workspace.Hardcore |
+| `require_encrypt_export` (шифрование при экспорте) | Политика Бэка | Owner | Workspace.Backoffice / Workspace.Hardcore |
+| `allow_import` / `max_import_files` / `max_import_file_size` | Политика Бэка | Owner | Workspace.Hardcore |
+| `clipboard_allow_export` (`none` / `text` / `all`) | Политика Бэка | Owner | Workspace.Backoffice / Workspace.Hardcore |
+| `clipboard_life_time`, `clipboard_persist` | Политика Бэка | Owner | Workspace.Backoffice / Workspace.Hardcore |
 | Recovery-фраза (24 слова BIP-39) | Бумага / YubiKey (вне системы) | Пользователь (Owner) | GUI при первом запуске |
 
 ### 8.8 Синхронизация и бэкап — настройки
 
 | Что настраивается | Где хранится | Интерфейс |
 |-------------------|--------------|-----------|
-| P2P Mesh (включение/отключение компонентов) | Бэк (JSON-конфиг) | Core.Hardcore / Command Bar |
+| P2P Mesh (включение/отключение компонентов) | Бэк (JSON-конфиг) | Workspace.Hardcore / Command Bar |
 | Seeding (смена primary Бэка) | CRDT + mesh-реестр | Command Bar → «Бэки» → «Сделать primary» |
-| Бэкап: targets (USB, S3, SFTP, другой Бэк, Custom) | JSON-конфиг Бэка | Core.Backoffice / Core.Hardcore / Command Bar |
+| Бэкап: targets (USB, S3, SFTP, другой Бэк, Custom) | JSON-конфиг Бэка | Workspace.Backoffice / Workspace.Hardcore / Command Bar |
 | Бэкап: расписание (`hourly` / `daily` / `weekly`) | JSON-конфиг Бэка | GUI / CLI |
 | Бэкап: retention (сколько копий, default 7) | JSON-конфиг Бэка | GUI / CLI |
 | Бэкап: warnings (`no_backup_days`, `low_space_mb`) | JSON-конфиг Бэка | GUI / CLI |
@@ -872,7 +872,7 @@ URL → App Runtime создаёт Island Process
 
 | Что настраивается | Где хранится | Интерфейс |
 |-------------------|--------------|-----------|
-| Core.Mind: включён / выключен | SQLite / JSON (`core.json`) | GUI → System Settings → AI |
+| Workspace.Mind: включён / выключен | SQLite / JSON (`workspace.json`) | GUI → System Settings → AI |
 | Режим работы (`local` / `hybrid-consent` / `hybrid-auto` / `cloud-only`) | SQLite / JSON | GUI → AI |
 | ASR-модель (Whisper base / medium / large) | JSON (`ai.asr.model`) | GUI → AI |
 | NLU-модель (Llama 3.1 8B, Phi-4 и т.д.) | JSON (`ai.nlu.model`) | GUI → AI |
@@ -881,11 +881,11 @@ URL → App Runtime создаёт Island Process
 | Cloud LLM провайдер (OpenAI, Anthropic, GLM, Kimi) | JSON (`ai.cloud_bridge.providers`) | GUI → AI |
 | Ограничение RAM/VRAM для AI | JSON (`ai.scheduler`) | GUI → AI |
 | Язык голосового ввода | SQLite / JSON | GUI → AI |
-| Wake-word («Core» или кастомное) | SQLite / JSON | GUI → AI |
+| Wake-word («WORKSPACE» или кастомное) | SQLite / JSON | GUI → AI |
 | Чувствительность wake-word | SQLite / JSON | GUI → AI |
 | Push-to-talk (клавиша / геймпад / наушники) | SQLite / JSON | GUI → AI |
 | Отключение AI по приложению (`os.mind.optOut()`) | Runtime (V8 Isolate) | Код приложения |
-| RBAC для AI (`ai:use_local`, `ai:use_cloud`, `ai:configure`, `ai:load_custom_model`) | RBAC Engine (Бэк) | Core.Backoffice / Core.Hardcore |
+| RBAC для AI (`ai:use_local`, `ai:use_cloud`, `ai:configure`, `ai:load_custom_model`) | RBAC Engine (Бэк) | Workspace.Backoffice / Workspace.Hardcore |
 
 ### 8.11 Устройства — настройки
 
@@ -924,7 +924,7 @@ URL → App Runtime создаёт Island Process
 |-------------------|--------------|------------|-----------|
 | Горячие клавиши (любое сочетание для любого действия) | SQLite (пользовательский конфиг профиля) | Пользователь | GUI → Настройки → Горячие клавиши |
 | Жесты (тачпад, тачскрин) | SQLite (пользовательский конфиг профиля) | Пользователь | GUI → Настройки → Горячие клавиши (запись жеста) |
-| Корпоративный input mapping | JSON / SQLite (конфиг Бэка) | Админ | Core.Backoffice → политики → input mapping / Core.Hardcore: `core-cli settings input set --action ... --key ...` |
+| Корпоративный input mapping | JSON / SQLite (конфиг Бэка) | Админ | Workspace.Backoffice → политики → input mapping / Workspace.Hardcore: `workspace-cli settings input set --action ... --key ...` |
 | Game Mode: горячая клавиша входа/выхода | SQLite (пользовательский конфиг) | Пользователь | GUI |
 
 **Действия по умолчанию:**
@@ -943,21 +943,21 @@ URL → App Runtime создаёт Island Process
 
 ## 9. Администрирование
 
-### 9.1 Core.Backoffice (GUI)
+### 9.1 Workspace.Backoffice (GUI)
 
-- GUI-приложение внутри CORE. Работает через Фронт, подключённый к Бэку.
+- GUI-приложение внутри WORKSPACE. Работает через Фронт, подключённый к Бэку.
 - Предустановлено в домашней конфигурации.
 - **Корпоративный режим:** приложение не устанавливается. Флаг `allow_gui_admin: false` — Бэк отказывается запускать даже при ручной загрузке.
 
 **Доступно в режимах:**
 
-| Режим | Core.Backoffice | Core.Hardcore |
+| Режим | Workspace.Backoffice | Workspace.Hardcore |
 |-------|-----------------|---------------|
 | Домашний | Да | Да |
 | Малая команда | Да | Да |
 | Корпоративный | Заблокирован | Единственный способ |
 
-### 9.2 Core.Hardcore (TUI + CLI)
+### 9.2 Workspace.Hardcore (TUI + CLI)
 
 - TUI-приложение прямо на Бэке. Подключение по SSH.
 - Без Фронта, без GUI, без WebGPU.
@@ -965,12 +965,12 @@ URL → App Runtime создаёт Island Process
 
 **Примеры команд:**
 ```bash
-ssh admin@core-server -- core-cli user add --name "Иван" --role developer
-ssh admin@core-server -- core-cli app deploy --file crm.pkg --role all
-ssh admin@core-server -- core-cli backup --full --output /mnt/backup/
-ssh admin@core-server -- core-cli settings input set --action "switch-space" --key "Ctrl+Shift+Tab"
-ssh admin@core-server -- core-cli directory set --type ldap --url ldap://corp.local
-ssh admin@core-server -- core-cli directory map --ldap-group "Engineers" --role "developer"
+ssh admin@WORKSPACE-server -- workspace-cli user add --name "Иван" --role developer
+ssh admin@WORKSPACE-server -- workspace-cli app deploy --file crm.pkg --role all
+ssh admin@WORKSPACE-server -- workspace-cli backup --full --output /mnt/backup/
+ssh admin@WORKSPACE-server -- workspace-cli settings input set --action "switch-space" --key "Ctrl+Shift+Tab"
+ssh admin@WORKSPACE-server -- workspace-cli directory set --type ldap --url ldap://corp.local
+ssh admin@WORKSPACE-server -- workspace-cli directory map --ldap-group "Engineers" --role "developer"
 ```
 
 ### 9.3 Бэк-конфигурация
@@ -1037,7 +1037,7 @@ ssh admin@core-server -- core-cli directory map --ldap-group "Engineers" --role 
 | Member | Чтение/запись |
 | Guest | Только чтение |
 
-**Кастомные роли:** Owner создаёт через Core.Backoffice / Core.Hardcore.
+**Кастомные роли:** Owner создаёт через Workspace.Backoffice / Workspace.Hardcore.
 
 **Категории аудита (13 штук):**
 `auth`, `roles`, `projects`, `files`, `notes`, `tags`, `messenger`, `search`, `apps`, `browser`, `profiles`, `system`, `multi-back`.
@@ -1093,7 +1093,7 @@ ssh admin@core-server -- core-cli directory map --ldap-group "Engineers" --role 
 | `"проверь почту"` | Показать непрочитанные в строке | Email Engine |
 | `"скинь [файл] [контакту]"` | ИИ-мост: найти файл → найти контакт → отправить | Intent API + Chat Engine |
 | `"покажи график [данных]"` | Генеративный UI: построить график | Generative UI Engine |
-| `"сделай музыку тише"` | `Core.Audio.setVolume(0.5)` | Zero UI |
+| `"сделай музыку тише"` | `Workspace.Audio.setVolume(0.5)` | Zero UI |
 | `"поставь будильник на [время]"` | `Scheduler.setAlarm(time)` | Zero UI |
 | `"что по проекту?"` | ИИ-сводка → TTS в наушники | Zero UI + TTS |
 | `"screenshot"` / `"скриншот"` | Сделать скриншот текущего окна | System Intent |
@@ -1114,7 +1114,7 @@ ssh admin@core-server -- core-cli directory map --ldap-group "Engineers" --role 
 
 | Условие | Действие |
 |---------|----------|
-| Тройное касание любого угла экрана | Мгновенный выход из CORE в хост-ОС |
+| Тройное касание любого угла экрана | Мгновенный выход из WORKSPACE в хост-ОС |
 | `Ctrl+Shift+Esc` (дефолт) | То же самое |
 | Длинное нажатие питания (>3 сек) | Меню хост-ОС |
 
@@ -1220,7 +1220,7 @@ Panic Gesture ловится на уровне Host Shim (Level 0) — не бл
 │   ├── Права доступа
 │   └── Автообновление
 ├── AI
-│   ├── Core.Mind (вкл/выкл)
+│   ├── Workspace.Mind (вкл/выкл)
 │   ├── Режим (local / hybrid / cloud)
 │   ├── Модели (ASR, NLU, TTS)
 │   └── Cloud Bridge (провайдеры, consent)
@@ -1240,7 +1240,7 @@ Panic Gesture ловится на уровне Host Shim (Level 0) — не бл
     └── Бэкап (восстановление, расписание)
 ```
 
-### 11.7 Core.Backoffice (GUI администрирования)
+### 11.7 Workspace.Backoffice (GUI администрирования)
 
 **Доступ:** Command Bar → «администрирование» (только для Owner / админов).
 
@@ -1275,9 +1275,9 @@ Backoffice
     └── История сессий
 ```
 
-### 11.8 Core.Hardcore (TUI)
+### 11.8 Workspace.Hardcore (TUI)
 
-**Подключение:** `ssh admin@core-server`.
+**Подключение:** `ssh admin@WORKSPACE-server`.
 
 **Интерфейс:** TUI на базе `ratatui` (Rust) или аналог. Меню навигации стрелками, формы ввода, таблицы.
 

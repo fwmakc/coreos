@@ -30,7 +30,7 @@ Host Shim — единственный слой, который напрямую
 - Поддержка всех клавиатурных раскладок (scancode → keycode → символ через OS layout).
 - Модификаторы: Shift, Ctrl, Alt, Meta (Win).
 - Комбинации: Ctrl+Alt+Del **не перехватывается** — это Secure Attention Sequence Windows, обрабатывается Winlogon [См. layer-4 §5.2].
-- Сочетания Alt+Tab, Win+Tab в полноэкранном режиме: Alt+Tab переключает окна внутри CORE, Win/Super — открывает Command Bar [См. layer-1 §4.2, layer-4 §5.1].
+- Сочетания Alt+Tab, Win+Tab в полноэкранном режиме: Alt+Tab переключает окна внутри WORKSPACE, Win/Super — открывает Command Bar [См. layer-1 §4.2, layer-4 §5.1].
 
 ### 1.3 Ввод с мыши
 - События: Move, ButtonDown/Up, Scroll.

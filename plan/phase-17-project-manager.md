@@ -10,7 +10,7 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 12** — Micro-Kernel: Core (SQLite, event loop).
+- **Этап 12** — Micro-Kernel: WORKSPACE (SQLite, event loop).
 - **Этап 14** — Micro-Kernel: VFS (файлы, теги, CID).
 - **Этап 15** — Command Bar (создание проектов, навигация).
 
@@ -69,7 +69,7 @@
 - **Warm Recovery:** если приложение зависло, пользователь может "убить" его без потери данных — восстановление из последнего checkpoint [См. layer-1 §4.4].
 
 ### 14.6 Notes (Заметки)
-- Заметка — специальный тип файла в VFS (MIME: `text/x-core-note`).
+- Заметка — специальный тип файла в VFS (MIME: `text/x-WORKSPACE-note`).
 - **Формат:** Markdown-подмножество с расширениями (чекбоксы, теги inline).
 - **AI-теги:** placeholder. При сохранении заметки Semantic Kernel (этап 25) предлагает теги. На этом этапе — ручное тегирование.
 - **Ссылки:** `[[filename]]` или `[[tag]]` для внутренних ссылок.

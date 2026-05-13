@@ -38,9 +38,9 @@
 
 ### 4.4 Системные кнопки
 - **Назад (Back):** обрабатывается как `Escape` или специальное событие `SystemBack`. Приложение решает — обработать или передать системе.
-- **Домой (Home):** **Panic Gesture** — выход из CORE в хост-ОС (Android launcher) [См. layer-4 §5.3].
+- **Домой (Home):** **Panic Gesture** — выход из WORKSPACE в хост-ОС (Android launcher) [См. layer-4 §5.3].
 - **Недавние (Recents):** отображается как стандартный Android recent apps. Workspace в recent apps показывает snapshot текущего экрана.
-- **Кнопка питания:** блокировка экрана Android = блокировка экрана CORE (если CORE активно).
+- **Кнопка питания:** блокировка экрана Android = блокировка экрана WORKSPACE (если WORKSPACE активно).
 
 ### 4.5 Аудио (Oboe)
 - **Capture/Playback:** через `oboe` crate (AAudio, API 26+). Fallback на OpenSL ES для старых устройств.
@@ -63,13 +63,13 @@
 
 ### 4.9 Push Notifications (FCM)
 - **Firebase Cloud Messaging:** для remote wipe, push-уведомлений от Messenger когда приложение в фоне.
-- **Local notifications:** через `NotificationManager` когда CORE активно.
+- **Local notifications:** через `NotificationManager` когда WORKSPACE активно.
 
 ## Ключевые функции
 
 | Функция | Описание | Тест |
 |---------|----------|------|
-| Native Activity | Запуск | Установить APK → CORE запускается |
+| Native Activity | Запуск | Установить APK → WORKSPACE запускается |
 | Touch | Тачскрин | Коснуться → событие TouchDown с координатами |
 | Soft keyboard | IME | Тап в текстовое поле → клавиатура появляется |
 | Home button | Panic Gesture | Нажать Home → выход в Android launcher |

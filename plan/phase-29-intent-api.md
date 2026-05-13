@@ -1,4 +1,4 @@
-﻿# Этап 29 — Intent API & AI Core
+﻿# Этап 29 — Intent API & AI WORKSPACE
 
 ## Цель
 Создать систему Intent — обработку намерений пользователя: парсинг текста/голоса, разрешение в действия, Generative UI, Smart Scheduler, и Cloud Bridge для внешних AI. После этого этапа Workspace понимает, чего хочет пользователь, и выполняет или генерирует интерфейс для этого.
@@ -10,10 +10,10 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 12** — Micro-Kernel: Core (SQLite, event loop).
+- **Этап 12** — Micro-Kernel: WORKSPACE (SQLite, event loop).
 - **Этап 15** — Command Bar (текстовый ввод, режим Ask).
 - **Этап 28** — Voice Pipeline (ASR output → текст для Intent).
-- **Этап 23** — V8 Isolate Runtime (Generative UI рендерится через `@core/ui`).
+- **Этап 23** — V8 Isolate Runtime (Generative UI рендерится через `@workspace/ui`).
 
 ## Часть системы
 **Level 4 — Intent API** [См. layer-8 §7.1–7.12, layer-2 §2, layer-1 §2.4]
@@ -48,11 +48,11 @@
 - **Режим Ask (`?`):** пользователь вводит вопрос → Parser → Intent → Executor.
   - "какая погода?" → `web.search: "погода"` → результат в Command Bar suggestions.
   - "напиши письмо Ивану о встрече" → `email.compose: { to: "Иван", subject: "Встреча", body: "..." }`.
-- **Режим Script (`$`):** JavaScript код исполняется в sandbox. Код имеет доступ к `core.intent.emit()` для системных вызовов.
+- **Режим Script (`$`):** JavaScript код исполняется в sandbox. Код имеет доступ к `WORKSPACE.intent.emit()` для системных вызовов.
 
 ### 25.3 Generative UI
-- **Сценарий:** пользователь просит "создай форму для регистрации" — AI генерирует React-подобный компонент, который рендерится через `@core/ui`.
-- **Codegen:** SLM генерирует код на TypeScript (подмножество `@core/ui` API).
+- **Сценарий:** пользователь просит "создай форму для регистрации" — AI генерирует React-подобный компонент, который рендерится через `@workspace/ui`.
+- **Codegen:** SLM генерирует код на TypeScript (подмножество `@workspace/ui` API).
 - **Sandbox:** сгенерированный код выполняется в отдельном V8 Isolate с ограниченными capabilities (только `ui:render`, нет `fs:write` или `network:http`).
 - **Preview:** сгенерированный UI отображается в окне с кнопками "Применить" (добавить в проект) и "Изменить" (редактировать промпт).
 - **Human-in-the-loop:** пользователь может редактировать сгенерированный код перед применением.
@@ -67,7 +67,7 @@
 - **Выход:** план выполнения задач.
   - Например: "Рендеринг видео — фоновая задача, запустить когда CPU < 30%".
   - "Backup — ночью, когда устройство на зарядке".
-- **API:** `core.scheduler.schedule(task, constraints)`.
+- **API:** `WORKSPACE.scheduler.schedule(task, constraints)`.
 
 ### 25.5 Semantic Search (Local)
 - **Embeddings:** локальная модель `nomic-embed-text` или `bge-m3` (ONNX, ~100 МБ).
@@ -101,7 +101,7 @@
 - **Вход:** этап 13 (Command Bar) — текстовый ввод, режим Ask.
 - **Вход:** этап 24 (Voice) — распознанный текст.
 - **Выход:** resolved Intent → этап 20 (V8 Isolate) для app execution.
-- **Выход:** Generative UI → этап 20 (`@core/ui` render).
+- **Выход:** Generative UI → этап 20 (`@workspace/ui` render).
 - **Выход:** Smart Scheduler → этап 27 (Energy Manager) для constraints.
 - **Выход:** Semantic Search → этап 12 (VFS) для file retrieval.
 

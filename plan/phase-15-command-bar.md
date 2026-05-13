@@ -10,7 +10,7 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 12** — Micro-Kernel: Core (SQLite, event loop, IPC).
+- **Этап 12** — Micro-Kernel: WORKSPACE (SQLite, event loop, IPC).
 - **Этап 14** — Micro-Kernel: VFS (поиск файлов, теги).
 - **Этап 9–9** — Display Server (рендеринг UI — интеграция через IPC).
 

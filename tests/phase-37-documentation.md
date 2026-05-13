@@ -1,4 +1,4 @@
-# Тесты: Этап 37 — Documentation
+﻿# Тесты: Этап 37 — Documentation
 
 > User docs, developer docs, admin docs, API reference, cross-references, localization, code comments. Все тесты на реальных документах.
 
@@ -25,7 +25,7 @@
 **Шаги:**
 1. `bun run docs:generate`.
 **Ожидаемый результат:**
-- 100% `@core/*` APIs documented.
+- 100% `@workspace/*` APIs documented.
 **Автоматизация:** автоматический.
 
 ### TC-37-004: Developer docs — API examples

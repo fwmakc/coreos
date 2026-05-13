@@ -10,7 +10,7 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 12** — Micro-Kernel: Core (SQLite, event loop, IPC).
+- **Этап 12** — Micro-Kernel: WORKSPACE (SQLite, event loop, IPC).
 - **Этап 13** — Micro-Kernel: Security (capability checks для доступа к файлам).
 - **Этап 7** — Host Shim: Storage (чтение/запись файлов хоста).
 

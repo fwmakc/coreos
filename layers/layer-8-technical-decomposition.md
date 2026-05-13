@@ -162,10 +162,10 @@ Mirror Engine:
 Storage Manager → VFS (passport + body)
 ```
 
-**Обратное направление (CORE → хост-ОС):**
-- Файл создан в CORE → Host Shim создаёт файл в `D:\Work` через стандартные API хост-ОС
-- Файл удалён в CORE → удаление в `D:\Work`
-- Теги: если хост-ОС поддерживает расширенные атрибуты (NTFS ADS, xattr) → теги записываются туда. Иначе — теги только в SQLite CORE
+**Обратное направление (WORKSPACE → хост-ОС):**
+- Файл создан в WORKSPACE → Host Shim создаёт файл в `D:\Work` через стандартные API хост-ОС
+- Файл удалён в WORKSPACE → удаление в `D:\Work`
+- Теги: если хост-ОС поддерживает расширенные атрибуты (NTFS ADS, xattr) → теги записываются туда. Иначе — теги только в SQLite WORKSPACE
 
 **Watcher API (Host Shim):**
 - Windows: `ReadDirectoryChangesW` на mirror-пути
@@ -236,9 +236,9 @@ TSCLANG / Rust (Host Shim, Level 0)
 
 **Где:** Level 0 (Rust, системные вызовы).
 
-### eBPF / XDP (Core Base only)
+### eBPF / XDP (WORKSPACE Base only)
 
-**Что:** На выделенном железе (Core Base, Raspberry Pi) Host Shim использует eBPF/XDP для низкоуровневой обработки сетевого трафика — P2P mesh, WireGuard, rate limiting.
+**Что:** На выделенном железе (WORKSPACE Base, Raspberry Pi) Host Shim использует eBPF/XDP для низкоуровневой обработки сетевого трафика — P2P mesh, WireGuard, rate limiting.
 
 **Как:**
 
@@ -246,33 +246,33 @@ TSCLANG / Rust (Host Shim, Level 0)
 P2P Mesh (Level 2) -> Host Shim Network Bridge
   |
   +-- Обычные устройства (Windows/macOS/Linux): raw sockets через std API
-  +-- Core Base (Linux без хост-ОС):
+  +-- WORKSPACE Base (Linux без хост-ОС):
       +-- XDP program (eBPF) — фильтрация пакетов на уровне NIC driver
       +-- Rate limiting: пакеты сверх лимита дропаются в ядре, не доходят до userspace
       +-- WireGuard: обработка handshake в eBPF, data packets — fast path
       +-- DDoS mitigation: SYN flood / UDP flood фильтруются на NIC
 ```
 
-**Почему только Core Base:** На Windows/macOS eBPF/XDP недоступен — CORE работает как приложение. На Core Base (Linux bare metal) — полный контроль над сетевым стеком.
+**Почему только WORKSPACE Base:** На Windows/macOS eBPF/XDP недоступен — WORKSPACE работает как приложение. На WORKSPACE Base (Linux bare metal) — полный контроль над сетевым стеком.
 
 **Где:** Level 0 (Host Shim, eBPF loader + XDP program).
 
-### OverlayFS / Immutable Core
+### OverlayFS / Immutable WORKSPACE
 
 **Что:** Системные файлы Workspace неизменяемы. Обновления применяются атомарно через overlay: новая версия монтируется поверх, старая остаётся для rollback.
 
 **Как:**
 
 ```
-Core Base / Raspberry Pi (Linux):
+WORKSPACE Base / Raspberry Pi (Linux):
   |
-  +-- Lowerdir (read-only): системные файлы Workspace (/usr/core/, /lib/core/)
+  +-- Lowerdir (read-only): системные файлы Workspace (/usr/WORKSPACE/, /lib/WORKSPACE/)
   +-- Upperdir (read-write): пользовательские данные, кэш, логи
   +-- Workdir: рабочая директория OverlayFS
-  +-- Merged: то, что видит CORE runtime
+  +-- Merged: то, что видит WORKSPACE runtime
   |
   v Обновление:
-      +-- Новая версия CORE скачивается в /var/core/updates/v2/
+      +-- Новая версия WORKSPACE скачивается в /var/WORKSPACE/updates/v2/
       +-- Atomically remount: lowerdir = v2, upperdir сохраняется
       +-- Если v2 не стартует → rollback к v1 за 3 секунды
       +-- Если v1 тоже не стартует → fallback на «Золотой образ» (golden lowerdir, read-only SquashFS)
@@ -288,22 +288,22 @@ Core Base / Raspberry Pi (Linux):
 
 > Подробно: security-аспекты immutable rootfs, dm-verity, rollback attacks — в [Layer Security, §22.5.4](layer-7-security.md).
 
-### CPU Affinity Policy (Core Pinning)
+### CPU Affinity Policy (WORKSPACE Pinning)
 
 **Что:** Critical threads закрепляются на dedicated CPU cores для минимального latency.
 
 **Как:**
 
 ```
-Adaptive Core Pinning (Host Shim, Level 0):
+Adaptive WORKSPACE Pinning (Host Shim, Level 0):
   |
-  +-- Core Base (Linux bare metal):
+  +-- WORKSPACE Base (Linux bare metal):
   |   +-- 2 ядра: pin только render thread Display Server
   |   +-- 4+ ядер: pin весь Display Server process + Voice Engine thread
   |   +-- SCHED_RR (round-robin) + high priority — без system hang risk
   |   +-- Watchdog: если pinned thread не отвечает 100мс → forced unpause + restart
   |
-  +-- Windows / macOS (CORE как приложение):
+  +-- Windows / macOS (WORKSPACE как приложение):
   |   +-- Best effort: HIGH_PRIORITY_CLASS / QOS_CLASS_USER_INTERACTIVE
   |   +-- Без explicit pinning — ОС не даёт права
   |
@@ -633,7 +633,7 @@ URL введён в строке
 App Runtime -> создаёт Island Process
   |
   +-- Chromium sandbox (один на веб-окно)
-  +-- Изоляция: нет доступа к системным API CORE
+  +-- Изоляция: нет доступа к системным API WORKSPACE
   +-- Tabs: внутри каждого веб-окна свои вкладки
   |   +-- Ссылки открываются как вкладки внутри того же окна
   |   +-- Новое веб-окно — только через Command Bar (набрал URL)
@@ -648,14 +648,14 @@ Window Manager -> размещает Island как обычное окно в п
 
 ### 3.3 Нативные окна (WebGPU)
 
-**Что:** Собственные приложения CORE — рендер через WebGPU напрямую.
+**Что:** Собственные приложения WORKSPACE — рендер через WebGPU напрямую.
 
 **Как:**
 
 ```
 Приложение (V8 Isolate)
   |
-  +-- Вызывает Core.Graphics API (Level 3)
+  +-- Вызывает Workspace.Graphics API (Level 3)
   +-- Отправляет draw commands -> WebGPU Pipeline
   +-- Display Server композитит с другими окнами
   +-- Effects: blur, transparency, shadows -> Display Server
@@ -770,7 +770,7 @@ Display Server (Level 3)
 **Как:**
 
 ```
-Приложение вызывает Core.Graphics.requestGameMode()
+Приложение вызывает Workspace.Graphics.requestGameMode()
   |
   v
 Display Server проверяет:
@@ -794,8 +794,8 @@ Game Mode activated:
   |   +-- Без системного микшера (no system audio ducking)
   |
   +-- CPU Affinity:
-  |   +-- Game thread pinned на dedicated core (см. Host Shim, Core Pinning)
-  |   +-- SCHED_RR + high priority (Core Base)
+  |   +-- Game thread pinned на dedicated WORKSPACE (см. Host Shim, WORKSPACE Pinning)
+  |   +-- SCHED_RR + high priority (WORKSPACE Base)
   |
   +-- Network Overlay (опционально):
       +-- UDP-based real-time socket (не CRDT, не TCP)
@@ -873,7 +873,7 @@ Display Server (Level 3)
 
 ## 4. App Runtime
 
-Модель приложений — 5 уровней интеграции: от «набрал URL» до «полный натив на WebGPU». Манифест `core.json`, app-scoped SQLite, `@core/*` API, App Registry, безопасность — подробно в [Layer Apps](layer-6-apps.md).
+Модель приложений — 5 уровней интеграции: от «набрал URL» до «полный натив на WebGPU». Манифест `workspace.json`, app-scoped SQLite, `@workspace/*` API, App Registry, безопасность — подробно в [Layer Apps](layer-6-apps.md).
 
 ### 4.1 V8 Isolates
 
@@ -935,7 +935,7 @@ App Runtime (Level 1)
   |
   v
 Вызов API:
-  Core.Security.signWithBiometry({
+  Workspace.Security.signWithBiometry({
     data: transaction_payload,     // данные для подписи
     key_id: "payment_key_001",     // ID ключа (не сам ключ!)
     biometry: "required",          // FaceID / TouchID / Windows Hello
@@ -1005,18 +1005,18 @@ Host Shim (Level 0) — Secure Enclave / TPM:
 App Registry (SQLite):
   |
   +-- Системные (встроены):
-  |   +-- Core.Notes -- заметки
-  |   +-- Core.Calculator -- калькулятор
-  |   +-- Core.Player -- медиаплеер
-  |   +-- Core.Terminal -- терминал
-  |   +-- Core.Files -- файловый менеджер
-  |   +-- Core.Settings -- настройки
+  |   +-- Workspace.Notes -- заметки
+  |   +-- Workspace.Calculator -- калькулятор
+  |   +-- Workspace.Player -- медиаплеер
+  |   +-- Workspace.Terminal -- терминал
+  |   +-- Workspace.Files -- файловый менеджер
+  |   +-- Workspace.Settings -- настройки
   |
   +-- Веб-приложения (по адресу):
   |   +-- youtube.com -> Island Mode, без установки
   |
   +-- Сторонние (магазин):
-      +-- pkg.core.app/spotify -> загрузка кода -> V8 Isolate
+      +-- pkg.workspace.app/spotify -> загрузка кода -> V8 Isolate
 ```
 
 **Установка:**
@@ -1097,7 +1097,7 @@ Host Shim мониторит нативные процессы:
   |
   +-- Memory watchdog:
   |   +-- Процесс потребил >85% доступной RAM хост-ОС
-  |   +-- Процесс потребил >95% RAM, выделенной CORE
+  |   +-- Процесс потребил >95% RAM, выделенной WORKSPACE
   |   +-- Action: graceful suspend → сохранение checkpoint → kill process
   |
   +-- CPU watchdog:
@@ -1119,7 +1119,7 @@ Host Shim мониторит нативные процессы:
 - Если нет checkpoint → приложение запускается заново, пользователь теряет несохранённое состояние
 
 **Безопасность:**
-- Kill выполняется Host Shim на уровне ОС (SIGKILL / TerminateProcess), не через API CORE
+- Kill выполняется Host Shim на уровне ОС (SIGKILL / TerminateProcess), не через API WORKSPACE
 - После kill — GPU memory zeroize (очистка framebuffer и textures перед передачей другому приложению)
 - Нативный процесс не может перехватить watchdog — heartbeat проверяется Host Shim извне
 
@@ -1215,7 +1215,7 @@ struct SessionConfig {
 ```
 
 - Проверка каждую минуту: idle > auto_lock → lock screen; total > ttl → logout
-- Owner может принудительно завершить сессию устройства через Core.Hardcore или другой Фронт
+- Owner может принудительно завершить сессию устройства через Workspace.Hardcore или другой Фронт
 
 **Remote wipe:**
 - Owner инициирует remote wipe → Бэк отзывает session token → push-уведомление Фронту → lock screen + очистка кэша
@@ -1262,7 +1262,7 @@ WebGPU Pipeline (Level 3):
 - Пользователь видит «фриз» на 100–300мс, а не чёрный экран
 
 **Theme Engine / Design System:**
-- `@core/ui` — библиотека компонентов, адаптирующаяся под текущую тему
+- `@workspace/ui` — библиотека компонентов, адаптирующаяся под текущую тему
 - Тема = набор цветов, шрифтов, форм, анимаций
 - Компоненты перерисовываются автоматически при смене темы
 - Адаптация под форм-фактор: десктоп (мышь) vs мобильный (тач)
@@ -1330,28 +1330,28 @@ Error Reporting Engine (Level 1):
 
 ---
 
-### 4.9 core-dev (Developer CLI)
+### 4.9 workspace-dev (Developer CLI)
 
 **Что:** CLI-инструмент разработчика приложений для Workspace.
 
 **Команды:**
-- `core-dev install` — установка зависимостей `@core/*`
-- `core-dev run` — запуск приложения в dev-режиме (hot reload)
-- `core-dev build` — сборка в V8 Bytecode (`bun build --bytecode`)
-- `core-dev validate` — проверка манифеста `core.json`
-- `core-dev publish` — публикация в App Registry (pkg.core.app)
-- `core-dev check-updates` / `core-dev update` / `core-dev rollback`
+- `workspace-dev install` — установка зависимостей `@workspace/*`
+- `workspace-dev run` — запуск приложения в dev-режиме (hot reload)
+- `workspace-dev build` — сборка в V8 Bytecode (`bun build --bytecode`)
+- `workspace-dev validate` — проверка манифеста `workspace.json`
+- `workspace-dev publish` — публикация в App Registry (pkg.workspace.app)
+- `workspace-dev check-updates` / `workspace-dev update` / `workspace-dev rollback`
 
 **Где:** Опциональный компонент Level 1 (Micro-Kernel).
 
 ---
 
-### 4.10 @core/mock
+### 4.10 @workspace/mock
 
 **Что:** npm-пакет для тестирования приложений уровней 4–5 вне Workspace.
 
 **Как:**
-- In-memory реализации `@core/*` API (`@core/db`, `@core/fs`, `@core/network` и др.)
+- In-memory реализации `@workspace/*` API (`@workspace/db`, `@workspace/fs`, `@workspace/network` и др.)
 - Позволяет разрабатывать и тестировать приложение в обычном браузере/Node.js
 - Не требует запуска Workspace
 
@@ -1363,7 +1363,7 @@ Error Reporting Engine (Level 1):
 
 **Window Injection (`window.__WORKSPACE__`):**
 - Передача конфигурации в Island Mode (Chromium sandbox) до загрузки страницы
-- Данные: версия CORE, доступные API, тема, локаль
+- Данные: версия WORKSPACE, доступные API, тема, локаль
 - Приложение определяет среду выполнения и адаптируется
 
 **Env Injection (`process.env.WORKSPACE*`):**
@@ -1477,7 +1477,7 @@ Graph Store (SQLite):
 
 ### 6.1 Мессенджер
 
-**Что:** Чаты внутри CORE. `@ivan` -> открывает чат.
+**Что:** Чаты внутри WORKSPACE. `@ivan` -> открывает чат.
 
 **Как:**
 
@@ -1500,7 +1500,7 @@ Contact Book (SQLite):
   |
   v
 Отправка сообщения:
-  +-- CORE-контакт -> P2P, CRDT, мгновенно
+  +-- WORKSPACE-контакт -> P2P, CRDT, мгновенно
   +-- Внешний контакт -> bridge (Telegram/WhatsApp API, email)
   +-- Шифрование: end-to-end через WireGuard tunnel
 ```
@@ -1537,9 +1537,9 @@ UI строки:
   |
   v
 Звонок:
-  +-- CORE user -> P2P VoIP (WebRTC через WireGuard)
+  +-- WORKSPACE user -> P2P VoIP (WebRTC через WireGuard)
   +-- Внешний -> SIP bridge / GSM (через провайдера)
-  +-- Аудио -> Core.Audio (Level 0, Host Shim)
+  +-- Аудио -> Workspace.Audio (Level 0, Host Shim)
 ```
 
 ### 6.4 ИИ-мост ("скинь документ Ивану")
@@ -1572,10 +1572,10 @@ Intent API (Level 4):
 Пользователь диктует код специалисту
   |
   v
-Relay-сервер CORE Corp (NAT traversal) -> WireGuard-туннель до Бэка
+Relay-сервер WORKSPACE Corp (NAT traversal) -> WireGuard-туннель до Бэка
   |
   v
-Бэк проверяет: код валиден? подпись CORE Corp (Ed25519, HSM) верна?
+Бэк проверяет: код валиден? подпись WORKSPACE Corp (Ed25519, HSM) верна?
   |
   v
 На экране пользователя: "Подтверждённый специалист. Разрешить?"
@@ -1587,7 +1587,7 @@ Relay-сервер CORE Corp (NAT traversal) -> WireGuard-туннель до Б
 **Security controls:**
 - **Dual approval** для уровня доступа Full (требуется второе подтверждение)
 - **Видеозапись** сессий уровня Full — обязательна
-- **HSM key ceremony:** подпись запросов техподдержки через HSM CORE Corp (ключ никогда не покидает железо)
+- **HSM key ceremony:** подпись запросов техподдержки через HSM WORKSPACE Corp (ключ никогда не покидает железо)
 - **Anomaly detection:** если техподдержка обращается к одному Бэку > N раз — alert Owner
 - **Rate limiting:** максимум 3 попытки подключения с одного IP, потом блокировка 30 мин
 
@@ -1609,14 +1609,14 @@ Relay-сервер CORE Corp (NAT traversal) -> WireGuard-туннель до Б
   v
 Audio Stream -> Whisper Model (Level 4)
   |
-  +-- Работает на отдельном ядре процессора (Core Pinning, Level 0)
+  +-- Работает на отдельном ядре процессора (WORKSPACE Pinning, Level 0)
   +-- Или на NPU (если доступна)
   +-- Модель: Whisper small/medium (зависит от железа)
   +-- Результат: текст + confidence
   |
   v
 Wake word detection (опционально):
-  +-- "CORE" / "Компьютер" / настраиваемый
+  +-- "WORKSPACE" / "Компьютер" / настраиваемый
   +-- Или всегда слушает (privacy: локально, данные не уходят)
   |
   v
@@ -1649,7 +1649,7 @@ Wake word detection (опционально):
 ```
 Голосовая команда в Exclusive Mode (игра/видео):
   |
-  +-- "Сделай музыку тише" -> Core.Audio.setVolume(0.5)
+  +-- "Сделай музыку тише" -> Workspace.Audio.setVolume(0.5)
   +-- "Поставь будильник на 7" -> Scheduler.setAlarm(7:00)
   +-- "Скинь кадр Ване" -> Screenshot -> Chat -> отправка
   +-- "Что по проекту?" -> ИИ сводка -> TTS в наушники
@@ -1685,7 +1685,7 @@ Intent Queue принимает Intent = "saveProject(project_id=42)"
 
 ### 7.4 Безопасность голосового ввода
 
-- **Аппаратный индикатор записи (LED):** Host Shim активирует LED устройства при захвате микрофона. Пользователь видит, что CORE слушает.
+- **Аппаратный индикатор записи (LED):** Host Shim активирует LED устройства при захвате микрофона. Пользователь видит, что WORKSPACE слушает.
 - **Аудио-буфер обнуляется** после распознавания — сырые audio samples не сохраняются на диск и не передаются
 - **Integrity check Whisper model:** при загрузке модели проверяется BLAKE3-хеш. Подмена модели → отказ загрузки
 - **Opt-out:** пользователь может полностью отключить микрофон в настройках (Settings → Privacy → Voice Input)
@@ -1714,7 +1714,7 @@ Intent Parser (Level 4):
       +-- Словари Intents: "открой", "найди", "переключи", "создай"
       +-- FTS5 поиск по SQLite (имена файлов, теги, контакты)
       +-- 16 MB RAM, не требует GPU
-  +-- Full Tier (Core.Mind включён): Semantic Kernel + векторный поиск
+  +-- Full Tier (Workspace.Mind включён): Semantic Kernel + векторный поиск
       +-- Embeddings (nomic-embed-text/bge-m3) → векторный индекс
       +-- Context Enricher: обогащает запрос данными из индекса
   |
@@ -1736,7 +1736,7 @@ Intent Map -> находит зарегистрированный Intent
 **Что:** Выполняет Intent: вызывает приложение, системную команду, генерирует UI или обращается к Cloud Bridge.
 
 **Как:**
-- **Intent API вызов:** `Core.Notes.create_note({ content, project })`
+- **Intent API вызов:** `Workspace.Notes.create_note({ content, project })`
 - **Системный вызов:** изменение настроек, управление окнами
 - **Generative UI:** если готового приложения нет → генерация JS-виджета в Level 5 sandbox
 - **Cloud Bridge:** прокси-мост к облачным LLM (OpenAI, Anthropic, GLM, Kimi, Gemini) через OpenAI-compatible API
@@ -1748,7 +1748,7 @@ Intent Map -> находит зарегистрированный Intent
 **Как:**
 - Текст в Command Bar
 - TTS (Piper/Coqui) — локальный синтез речи
-- UI-виджет (временный, через `@core/graphics`)
+- UI-виджет (временный, через `@workspace/graphics`)
 - Безмолвное действие (выполнено, ничего не показано)
 
 ### 7.9 TTS Engine
@@ -1767,7 +1767,7 @@ Intent Map -> находит зарегистрированный Intent
 **Как:**
 - ИИ собирает данные из Semantic Kernel
 - Пишет JS-код в Level 5 sandbox
-- Отрисовывает временный виджет через `@core/graphics`
+- Отрисовывает временный виджет через `@workspace/graphics`
 - Пример: «Покажи график трат на кофе за год» → сгенерированный виджет
 
 ### 7.11 Cloud Bridge
@@ -1813,7 +1813,7 @@ Intent Map -> находит зарегистрированный Intent
 **Как:**
 - Whisper, SLM, TTS, Ollama — каждый в отдельном процессе или V8 Isolate
 - Нет прямого доступа к VFS, SQLite, сети (кроме Cloud Bridge через прокси)
-- Доступ только через `@core/*` wrappers
+- Доступ только через `@workspace/*` wrappers
 
 **Где:** Level 4 (Intent API, AI Engine) + Level 2 (Ollama/llama.cpp) + Level 0 (Host Shim для GPU/NPU).
 
@@ -1933,7 +1933,7 @@ Profile Store (SQLite):
 
 - Формат: JWT-подобный, подписан Ed25519 приватным ключом Бэка.
 - Payload: `profile_id`, `device_key_fingerprint` (BLAKE3 публичного ключа), `issued_at`, `expires_at` (default 24h).
-- Передача: в заголовке каждого API-запроса (`X-Core-Session`).
+- Передача: в заголовке каждого API-запроса (`X-WORKSPACE-Session`).
 - Валидация на Бэке: подпись валидна? `device_key_fingerprint` известен? `profile_id` существует? token не в revoke-листе?
 - При переключении профиля: старый token сбрасывается (discard на Фронте), новый запрашивается после загрузки профиля.
 
@@ -2011,7 +2011,7 @@ Mesh Engine (Level 2):
   +-- mDNS: обнаружение устройств в локальной сети
   |   +-- Без интернета — прямая передача по Wi-Fi
   |
-  +-- Core Base (опционально):
+  +-- WORKSPACE Base (опционально):
       +-- Всегда включённый узел (коробочка в розетку)
 ```
 
@@ -2085,7 +2085,7 @@ User B тоже может стать seed'ом (опционально)
 **TCP Relay (NAT Traversal Fallback):**
 - Если UDP заблокирован (firewall, провайдер) → fallback на TCP relay
 - Потеря скорости: ~20% по сравнению с UDP
-- Relay-серверы CORE Corp (опционально) или корпоративные Supernodes
+- Relay-серверы WORKSPACE Corp (опционально) или корпоративные Supernodes
 - Автоматическое переключение UDP → TCP при обнаружении блокировки
 
 **Dark-Mesh / Протокол Омега:**
@@ -2135,7 +2135,7 @@ Anti-entropy:
 - MST не обновляется "на месте"
 - Новая версия дерева строится в свободных блоках
 - Пока Root Hash не записан атомарно → валидна старая версия
-- Питание упало → при перезагрузке CORE видит незавершённый Root Hash v.2 и мгновенно откатывается к v.1
+- Питание упало → при перезагрузке WORKSPACE видит незавершённый Root Hash v.2 и мгновенно откатывается к v.1
 - Ни одного битого байта
 
 **Adaptive Sync Window (расширенное описание):**
@@ -2213,7 +2213,7 @@ Session Handoff:
 
 ### 9.5 Seeding и смена primary Бэка
 
-**Что:** Перенос всех данных с текущего primary Бэка (source) на новый узел (target) и переключение роли primary. Работает между любыми узлами: ноутбук → Core Base, ноутбук → сервер, сервер → VDS, VDS1 → VDS2.
+**Что:** Перенос всех данных с текущего primary Бэка (source) на новый узел (target) и переключение роли primary. Работает между любыми узлами: ноутбук → WORKSPACE Base, ноутбук → сервер, сервер → VDS, VDS1 → VDS2.
 
 **Как:**
 
@@ -2275,11 +2275,11 @@ Fallback:
 - **Rate limiting:** Один seeding в 24 часа на source. Повторный seeding требует явного подтверждения Owner.
 - **Аудит:** Операция записывается в audit log: `action: back_seeding`, source device, target device, timestamp, profile_id, snapshot_size, result.
 - **Recovery:** Для уровней безопасности «Повышенный» и «Максимальный» — ввод recovery-фразы или биометрия на source перед началом переноса.
-- **Secure wipe:** Команда `core-cli back wipe --device <id>` — перезапись всех данных профиля на source случайными данными (AES-256-GCM encrypted zeros) при выводе из эксплуатации.
+- **Secure wipe:** Команда `workspace-cli back wipe --device <id>` — перезапись всех данных профиля на source случайными данными (AES-256-GCM encrypted zeros) при выводе из эксплуатации.
 
 ### 9.6 Lazy Boot / Headless Logic
 
-**Что:** На устройствах с <512MB RAM и слабым CPU CORE запускается не полностью, а как "умный терминал".
+**Что:** На устройствах с <512MB RAM и слабым CPU WORKSPACE запускается не полностью, а как "умный терминал".
 
 **Как:**
 
@@ -2289,7 +2289,7 @@ Fallback:
   +-- Host Shim активирует режим Headless Logic
   +-- Запускается только Level 3 (Display Server) + Input Handler
   +-- Level 1 (Micro-Kernel) и Level 2 (Mesh Engine) — не запускаются локально
-  +-- Вся тяжёлая логика делегируется ближайшему мощному узлу (Core Base, Бэк-офис, ПК)
+  +-- Вся тяжёлая логика делегируется ближайшему мощному узлу (WORKSPACE Base, Бэк-офис, ПК)
       через Remote Isolate Call по P2P Mesh
   |
   v
@@ -2317,7 +2317,7 @@ Backup Engine (Level 1):
   |
   +-- BackupTarget interface:
       +-- UsbTarget: USB-накопитель
-      +-- CoreTarget: другой узел CORE через P2P
+      +-- CoreTarget: другой узел WORKSPACE через P2P
       +-- S3Target: облачное хранилище
       +-- SftpTarget: SFTP-сервер
       +-- CustomTarget: плагин
@@ -2392,7 +2392,7 @@ Energy Manager (Level 1 + Level 0):
 - Шифрование страниц AES-256-GCM-SIV
 - Page fault handler: расшифровка только при доступе
 
-### 10.6 Boot Integrity (Core Base / Raspberry Pi)
+### 10.6 Boot Integrity (WORKSPACE Base / Raspberry Pi)
 - LUKS encrypted rootfs по умолчанию
 - Signed kernel + initrd
 - QR-based passphrase через BLE/LAN с телефона
@@ -2744,7 +2744,7 @@ Clipboard Manager (Level 1, телефон)
 
 Три встроенные роли (Owner/Member/Guest), кастомные роли, группы, два уровня назначения (Space/проект). RBAC Engine на Level 1 (Micro-Kernel, SQLite). Проверка при каждом API-запросе.
 
-Управление: контекстное меню (Level 3), Command Bar (Level 1 + Level 4), Core.Hardcore (CLI).
+Управление: контекстное меню (Level 3), Command Bar (Level 1 + Level 4), Workspace.Hardcore (CLI).
 
 Подробно: роли, наследование, группы, техническая реализация — в [Layer Security, секция 3](layer-7-security.md).
 
@@ -2754,7 +2754,7 @@ Clipboard Manager (Level 1, телефон)
 
 Бэк логирует действия пользователей. 13 категорий, include/exclude фильтры, настраиваемый retention. Audit Engine на Level 1 (Micro-Kernel, отдельная SQLite-таблица). Owner видит всё, Member/Guest — не видят.
 
-Просмотр: Core.Hardcore (CLI), Command Bar (Intent Parser), контекстное меню (история доступа).
+Просмотр: Workspace.Hardcore (CLI), Command Bar (Intent Parser), контекстное меню (история доступа).
 
 Подробно: 13 категорий, настройки, JSON-конфиг, техническая реализация — в [Layer Security, секция 4](layer-7-security.md).
 
@@ -2764,7 +2764,7 @@ Clipboard Manager (Level 1, телефон)
 
 ### 16.1 User Directory
 
-Абстракция `UserDirectory` с четырьмя провайдерами: Local (default), LDAP (AD, FreeIPA), OAuth (Google, Microsoft, GitHub), Custom (плагин). Маппинг групп → роли CORE. Настройка через Core.Hardcore (CLI) или Command Bar (Owner).
+Абстракция `UserDirectory` с четырьмя провайдерами: Local (default), LDAP (AD, FreeIPA), OAuth (Google, Microsoft, GitHub), Custom (плагин). Маппинг групп → роли WORKSPACE. Настройка через Workspace.Hardcore (CLI) или Command Bar (Owner).
 
 **Где:** Level 1 (Micro-Kernel, UserDirectory interface + implementations).
 
@@ -2789,12 +2789,12 @@ Component Manager (Level 1):
   +-- Профили настроек:
   |   +-- Минимальный: только ядро
   |   +-- Сбалансированный: ядро + Chat + Scheduler (default для телефонов)
-  |   +-- Полный: все компоненты (default для ПК/Core Base)
+  |   +-- Полный: все компоненты (default для ПК/WORKSPACE Base)
   |
   +-- Конфигурация:
       +-- При установке: мастер настройки (рекомендует профиль по устройству)
       +-- После: Command Bar "settings backoffice components"
-      +-- Core.Hardcore: core-cli component enable/disable
+      +-- Workspace.Hardcore: workspace-cli component enable/disable
       +-- Компоненты переключаются динамически
 ```
 
@@ -2842,7 +2842,7 @@ Watchdog (уровень Бэка):
   |
   +-- Owner → "Пригласить в Space"
   +-- Invite Engine (Level 1):
-      +-- Генерирует токен (32 байта, base32: CORE-A7X9-K2M4)
+      +-- Генерирует токен (32 байта, base32: WORKSPACE-A7X9-K2M4)
       +-- Привязка: role, TTL (24ч default)
       +-- Хранит: invite_tokens (SQLite)
       |

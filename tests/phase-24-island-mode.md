@@ -1,4 +1,4 @@
-# Тесты: Этап 24 — Island Mode
+﻿# Тесты: Этап 24 — Island Mode
 
 > CEF/WebKit embedding, cookie isolation, storage isolation, GPU acceleration, file upload, level 1/2 apps. Все тесты на реальных веб-страницах.
 
@@ -117,7 +117,7 @@
 - Работает. Нет permission requests.
 **Автоматизация:** автоматический.
 
-### TC-24-015: Level 2 app — SPA with core.json
+### TC-24-015: Level 2 app — SPA with workspace.json
 **Тип:** E2E | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
 1. Open SPA. 2. Request `fs:read`.

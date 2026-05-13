@@ -5,7 +5,7 @@
 
 ## Язык и стек
 - **Язык:** Rust
-- **Ключевые зависимости:** `winit` (окно + события), `cocoa` / `objc` crates (Native APIs при необходимости), `core-graphics` (DPI, дисплеи)
+- **Ключевые зависимости:** `winit` (окно + события), `cocoa` / `objc` crates (Native APIs при необходимости), `WORKSPACE-graphics` (DPI, дисплеи)
 - **Целевая ОС:** macOS 12+ (Intel, Apple Silicon)
 
 ## Зависимости
@@ -21,12 +21,12 @@
 - Поддержка оконного режима и полноэкранного (borderless fullscreen + native macOS Full Screen через зелёную кнопку).
 - DPI scaling через `NSScreen::backingScaleFactor`.
 - Title bar styling: Workspace рендерит собственный chrome, поэтому нативный title bar скрывается или минимизируется.
-- **Важно:** macOS Full Screen (зелёная кнопка) должен переключать в borderless fullscreen режим CORE, а не создавать отдельное Space macOS.
+- **Важно:** macOS Full Screen (зелёная кнопка) должен переключать в borderless fullscreen режим WORKSPACE, а не создавать отдельное Space macOS.
 
 ### 2.2 Ввод с клавиатуры
 - KeyDown / KeyUp / KeyRepeat через `winit`.
 - Модификаторы: Shift, Ctrl, Option (Alt), Command (Meta).
-- **Особенность macOS:** Cmd+Tab переключает приложения macOS, а не окна внутри CORE. В полноэкранном режиме CORE: Cmd+Tab = Command Bar, Option+Tab = переключение окон внутри CORE [См. layer-1 §4.2].
+- **Особенность macOS:** Cmd+Tab переключает приложения macOS, а не окна внутри WORKSPACE. В полноэкранном режиме WORKSPACE: Cmd+Tab = Command Bar, Option+Tab = переключение окон внутри WORKSPACE [См. layer-1 §4.2].
 - **Panic Gesture:** тройное касание угла или Ctrl+Shift+Esc (Cmd+Esc на macOS) → `PanicExit`.
 
 ### 2.3 Ввод с мыши и трекпада

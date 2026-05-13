@@ -10,7 +10,7 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 9** — Display Server: Core (swapchain, surface, base pipeline).
+- **Этап 9** — Display Server: WORKSPACE (swapchain, surface, base pipeline).
 - **Этап 10** — Display Server: 2D (примитивы, текст, текстуры).
 
 ## Часть системы
@@ -71,7 +71,7 @@
 | Alt+Tab in Game | Shadow framebuffer | Alt+Tab → window switcher поверх frozen игры |
 
 ## Интеграция с будущими этапами
-- **Вход:** этап 7 (Core) — swapchain, surface.
+- **Вход:** этап 7 (WORKSPACE) — swapchain, surface.
 - **Вход:** этап 8 (2D) — примитивы, текст, текстуры для chrome и overlay.
 - **Вход:** этап 15 (Window Manager) — запросы на открытие/закрытие/перемещение окон.
 - **Вход:** этап 20 (V8 Isolate) / 21 (Island Mode) — текстуры содержимого окон.

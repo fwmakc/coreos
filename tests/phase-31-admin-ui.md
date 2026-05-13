@@ -1,6 +1,6 @@
-# Тесты: Этап 31 — Admin UI
+﻿# Тесты: Этап 31 — Admin UI
 
-> Core.Backoffice GUI, Core.Hardcore TUI/CLI, SSH admin, device management, health dashboard. Все тесты на реальных интерфейсах.
+> Workspace.Backoffice GUI, Workspace.Hardcore TUI/CLI, SSH admin, device management, health dashboard. Все тесты на реальных интерфейсах.
 
 ---
 

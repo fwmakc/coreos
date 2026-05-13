@@ -1,7 +1,7 @@
-# Этап 27 — VoIP Engine
+﻿# Этап 27 — VoIP Engine
 
 ## Цель
-Создать подсистему голосовых и видео звонков между пользователями CORE через WebRTC поверх WireGuard. После этого этапа пользователь может звонить другим пользователям CORE с шифрованием end-to-end.
+Создать подсистему голосовых и видео звонков между пользователями WORKSPACE через WebRTC поверх WireGuard. После этого этапа пользователь может звонить другим пользователям WORKSPACE с шифрованием end-to-end.
 
 ## Язык и стек
 - **Язык:** TypeScript
@@ -49,7 +49,7 @@
 - Hold/Resume: при hold — mute audio, при resume — unmute.
 - Conference: merge 2 calls (3-way, опционально).
 
-### 27.6 UI (core.voip)
+### 27.6 UI (WORKSPACE.voip)
 - Incoming call overlay: поверх всех окон, через Display Server Overlay Layer.
 - In-call UI: mute, speaker (hands-free), end call, duration, quality indicator (bars).
 - Call history: список с duration, outcome, recording (если enabled).

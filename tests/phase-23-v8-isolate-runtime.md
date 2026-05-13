@@ -1,6 +1,6 @@
-# Тесты: Этап 23 — V8 Isolate Runtime
+﻿# Тесты: Этап 23 — V8 Isolate Runtime
 
-> Sandbox, `@core/*` API, permissions UI, warm recovery, 100 isolates. Все тесты на реальных изолятах.
+> Sandbox, `@workspace/*` API, permissions UI, warm recovery, 100 isolates. Все тесты на реальных изолятах.
 
 ---
 
@@ -20,23 +20,23 @@
 - Все запущены. RAM < 2 GB.
 **Автоматизация:** автоматический.
 
-### TC-23-003: `@core/fs` — read
+### TC-23-003: `@workspace/fs` — read
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
-1. Isolate читает `@core/fs.read("/data/test.txt")`.
+1. Isolate читает `@workspace/fs.read("/data/test.txt")`.
 **Ожидаемый результат:**
 - Данные прочитаны. Capability check passed.
 **Автоматизация:** автоматический.
 
-### TC-23-004: `@core/fs` — write
+### TC-23-004: `@workspace/fs` — write
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
-1. `@core/fs.write("/data/out.txt", "hello")`.
+1. `@workspace/fs.write("/data/out.txt", "hello")`.
 **Ожидаемый результат:**
 - Запись успешна.
 **Автоматизация:** автоматический.
 
-### TC-23-005: `@core/fs` — read without capability
+### TC-23-005: `@workspace/fs` — read without capability
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
 1. Без `fs:read`. 2. Читать.
@@ -44,7 +44,7 @@
 - `CapabilityError(fs:read denied)`.
 **Автоматизация:** автоматический.
 
-### TC-23-006: `@core/fs` — write without capability
+### TC-23-006: `@workspace/fs` — write without capability
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
 1. Без `fs:write`. 2. Писать.
@@ -52,23 +52,23 @@
 - `CapabilityError(fs:write denied)`.
 **Автоматизация:** автоматический.
 
-### TC-23-007: `@core/ui` — drawRect
+### TC-23-007: `@workspace/ui` — drawRect
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
-1. `@core/ui.drawRect(0, 0, 100, 100, "#FF0000")`.
+1. `@workspace/ui.drawRect(0, 0, 100, 100, "#FF0000")`.
 **Ожидаемый результат:**
 - Пиксели (50,50) = красные.
 **Автоматизация:** автоматический.
 
-### TC-23-008: `@core/ui` — drawText
+### TC-23-008: `@workspace/ui` — drawText
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
-1. `@core/ui.drawText(0, 0, "Hello", "Inter", 16)`.
+1. `@workspace/ui.drawText(0, 0, "Hello", "Inter", 16)`.
 **Ожидаемый результат:**
 - Текст отображается.
 **Автоматизация:** автоматический.
 
-### TC-23-009: `@core/ui` — without capability
+### TC-23-009: `@workspace/ui` — without capability
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
 1. Без `ui:draw`. 2. Draw.
@@ -76,15 +76,15 @@
 - `CapabilityError`.
 **Автоматизация:** автоматический.
 
-### TC-23-010: `@core/net` — fetch HTTP
+### TC-23-010: `@workspace/net` — fetch HTTP
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
-1. `@core/net.fetch("https://example.com")`.
+1. `@workspace/net.fetch("https://example.com")`.
 **Ожидаемый результат:**
 - HTTP 200. HTML body.
 **Автоматизация:** автоматический.
 
-### TC-23-011: `@core/net` — fetch without capability
+### TC-23-011: `@workspace/net` — fetch without capability
 **Тип:** Integration | **Платформа:** All | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
 1. Без `net:fetch`. 2. Fetch.

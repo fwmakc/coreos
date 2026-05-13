@@ -12,7 +12,7 @@
 ## Зависимости
 - **Этап 11** — Display Server: Compositor (post-processing stack, shader pipeline).
 - **Этап 16** — Command Bar UI (компоненты должны поддерживать accessibility).
-- **Этап 23** — V8 Isolate Runtime (`@core/ui` components accessibility props).
+- **Этап 23** — V8 Isolate Runtime (`@workspace/ui` components accessibility props).
 
 ## Часть системы
 **Level 3 — Фронт: Accessibility & Themes** [См. layer-1 §4.7, layer-8 §4.14, layer-9]
@@ -51,8 +51,8 @@
 - **Hot Reload:** изменение темы применяется мгновенно (< 100 мс) без перезагрузки приложений. Shader recompilation + uniform update.
 
 ### 33.3 Migration Tools
-- **Export:** `core-cli backup --export` или GUI wizard. Выбор scope: all data, projects only, settings only.
-- **Import:** `core-cli restore --import`. Валидация формата версии, миграция schema при необходимости.
+- **Export:** `workspace-cli backup --export` или GUI wizard. Выбор scope: all data, projects only, settings only.
+- **Import:** `workspace-cli restore --import`. Валидация формата версии, миграция schema при необходимости.
 - **Cross-platform:** backup с Windows восстанавливается на macOS/Android (blob'ы + SQLite).
 
 ## Ключевые функции
@@ -71,7 +71,7 @@
 ## Интеграция с будущими этапами
 - **Вход:** этап 11 (Compositor) — post-processing shaders, uniform updates.
 - **Вход:** этап 16 (Command Bar UI) — компоненты поддерживают accessibility.
-- **Выход:** theme tokens → этап 23 (`@core/ui` components).
+- **Выход:** theme tokens → этап 23 (`@workspace/ui` components).
 - **Выход:** accessibility tree → platform APIs.
 
 ## Критерии приёмки

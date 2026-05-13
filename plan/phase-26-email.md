@@ -39,10 +39,10 @@
 - Drafts: автосохранение черновиков каждые 30 сек (CRDT-операция, синхронизируется между устройствами).
 - HTML composer: WYSIWYG редактор с markdown shortcuts, inline images.
 
-### 26.4 UI (core.email)
+### 26.4 UI (WORKSPACE.email)
 - Список писем: sender, subject, snippet, date, unread, thread depth.
 - Чтение письма: HTML rendering через Island Mode (этап 24) с sandbox. Блокировка remote images (opt-in).
-- Композер: markdown + attachments + contact autocomplete (из core.contactbook).
+- Композер: markdown + attachments + contact autocomplete (из WORKSPACE.contactbook).
 - Search bar: FTS5 + фильтры (дата, sender, has:attachment).
 
 ### 26.5 Notifications

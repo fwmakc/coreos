@@ -10,7 +10,7 @@
 - **Целевые ОС:** Windows, macOS, Linux, Android
 
 ## Зависимости
-- **Этап 12** — Micro-Kernel: Core (SQLite, event loop).
+- **Этап 12** — Micro-Kernel: WORKSPACE (SQLite, event loop).
 - **Этап 14** — Micro-Kernel: VFS (файлы, версии, CID).
 
 ## Часть системы

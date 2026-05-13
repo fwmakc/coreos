@@ -34,7 +34,7 @@
 | 6 | Host Shim: Audio | Rust | Захват и воспроизведение аудио на всех ОС | 2 недели |
 | 7 | Host Shim: Storage | Rust | Файловый доступ, watcher, USB на всех ОС | 2 недели |
 | 8 | Host Shim: Network | Rust | Сокеты, WireGuard, P2P transport на всех ОС | 3 недели |
-| 9 | Display Server: Core | Rust | WebGPU инициализация, swapchain, базовый рендер | 3 недели |
+| 9 | Display Server: WORKSPACE | Rust | WebGPU инициализация, swapchain, базовый рендер | 3 недели |
 | 10 | Display Server: 2D | Rust | Примитивы, текст (все алфавиты), текстуры | 3 недели |
 | 11 | Display Server: Compositor | Rust | Scene graph, эффекты, Overlay Layer | 4 недели |
 
@@ -42,7 +42,7 @@
 
 | Этап | Название | Язык | Что работает после завершения | Примерное время |
 |------|----------|------|-------------------------------|-----------------|
-| 12 | Micro-Kernel: Core & IPC | TS/Bun | Bun runtime, IPC bridge, SQLite schema | 3 недели |
+| 12 | Micro-Kernel: WORKSPACE & IPC | TS/Bun | Bun runtime, IPC bridge, SQLite schema | 3 недели |
 | 13 | Micro-Kernel: Security Engine | TS/Bun | Capability Security, RBAC base, sandbox | 2 недели |
 | 14 | Micro-Kernel: VFS | TS/Bun | Виртуальная ФС, CID, теги, Smart Folders | 3 недели |
 | 15 | Command Bar: Engine | TS/Bun | 8 режимов, парсер, suggestions, hotkeys | 3 недели |
@@ -52,15 +52,15 @@
 | 19 | CRDT Engine | TS/Bun | Causal Trees, LWW, oplog, локальная sync | 3 недели |
 | 20 | P2P Mesh | TS/Bun | mDNS, libp2p, WireGuard, global sync, handoff | 4 недели |
 | 21 | Backup Engine | TS/Bun | 3-2-1 backup, USB/S3/P2P, restore, recovery phrase | 3 недели |
-| 22 | App Registry | TS/Bun | Установка, обновление, удаление, core.json, подписи | 2 недели |
-| 23 | V8 Isolate Runtime | TS/Bun | Sandbox, @core/* API, permissions UI, checkpoint | 4 недели |
+| 22 | App Registry | TS/Bun | Установка, обновление, удаление, workspace.json, подписи | 2 недели |
+| 23 | V8 Isolate Runtime | TS/Bun | Sandbox, @workspace/* API, permissions UI, checkpoint | 4 недели |
 | 24 | Island Mode | TS/C++ | WebView embedding, CEF/WebKit, web sandbox | 3 недели |
 | 25 | Messenger Engine | TS/Bun | P2P чат, группы, CRDT messages, offline delivery | 3 недели |
 | 26 | Email Engine | TS/Bun | IMAP/SMTP, композер, FTS, drafts | 3 недели |
 | 27 | VoIP Engine | TS/Bun | WebRTC через WireGuard, Opus, signaling | 3 недели |
 | 28 | Voice Pipeline | TS/Rust | Whisper ASR, TTS, Zero UI, Intent Queue | 3 недели |
-| 29 | Intent API & AI Core | TS/Bun | Intent parser, Generative UI, Smart Scheduler, Cloud Bridge | 4 недели |
-| 30 | Security Core | TS/Bun | RBAC full, Audit (13 кат.), Key Manager, Session, remote wipe | 3 недели |
+| 29 | Intent API & AI WORKSPACE | TS/Bun | Intent parser, Generative UI, Smart Scheduler, Cloud Bridge | 4 недели |
+| 30 | Security WORKSPACE | TS/Bun | RBAC full, Audit (13 кат.), Key Manager, Session, remote wipe | 3 недели |
 
 ### System Polish & DevOps
 
@@ -85,7 +85,7 @@
 | Host Shim | Rust (winit, wgpu, CPAL, Oboe, AVAudioEngine) | Окно, ввод, GPU, аудио, файлы, сеть |
 | Display Server | Rust (wgpu, WGSL) | WebGPU рендеринг, композитинг, эффекты |
 | Micro-Kernel | Bun (TypeScript) + V8 | IPC, SQLite, Capability Security, Runtime |
-| App Runtime | V8 Isolates (via Bun) | Приложения, sandbox, @core/* API |
+| App Runtime | V8 Isolates (via Bun) | Приложения, sandbox, @workspace/* API |
 | Island Mode | CEF / WebKit / WebView2 / WKWebView | Веб-контент, legacy apps |
 | AI Engine | Bun + ONNX / Ollama | Whisper, SLM, TTS, embeddings |
 | P2P / Sync | Bun + Rust (WireGuard) | Mesh, CRDT, анонсирование |
