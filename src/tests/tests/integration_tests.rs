@@ -7,8 +7,11 @@ use coreos_display_server::renderer::Renderer;
 use coreos_display_server::surface::Surface;
 use coreos_host_shim::backend::{HostBackend, HostError};
 use coreos_host_shim::events::*;
+use coreos_host_shim::host_event::{HostEvent, WindowId};
+use coreos_host_shim::platform::mock::MockPlatform;
+use coreos_host_shim::platform::Platform;
 use coreos_host_shim::window::{Window, WindowConfig};
-use coreos_island_mode::webview::{WebEngine, WebViewConfig};
+use coreos_island_mode::webview::WebEngine;
 use coreos_micro_kernel::ipc::{IpcError, IpcMessage};
 use coreos_micro_kernel::security::{Capability, Rights};
 
@@ -252,7 +255,7 @@ fn tc_13_012_rbac_custom_role_editor() {
 #[test]
 fn tc_15_006_fuzzy_exact_match() {
     let query = "calculator";
-    let candidates = vec!["calculator", "calendar", "clock"];
+    let candidates = ["calculator", "calendar", "clock"];
     let top = candidates.iter().find(|c| c == &&query).unwrap();
     assert_eq!(*top, "calculator");
 }
@@ -268,14 +271,14 @@ fn tc_15_007_fuzzy_prefix_match() {
 #[test]
 fn tc_15_008_fuzzy_substring_match() {
     let query = "lcul";
-    let candidates = vec!["calculator"];
+    let candidates = ["calculator"];
     assert!(candidates[0].contains(query));
 }
 
 #[test]
 fn tc_15_009_fuzzy_levenshtein_mock() {
     let query = "calemdar";
-    let candidates = vec!["calendar", "calculator"];
+    let candidates = ["calendar", "calculator"];
     // Placeholder: real test would use levenshtein distance.
     let top = candidates.iter().min_by_key(|c| {
         let dist = c.chars().zip(query.chars()).filter(|(a, b)| a != b).count();
@@ -378,7 +381,7 @@ fn host_error_variants_display_correctly() {
 
 #[test]
 fn webview_all_engines_exist() {
-    let engines = vec![
+    let engines = [
         WebEngine::CEF,
         WebEngine::WebKit,
         WebEngine::WebView2,
@@ -397,4 +400,63 @@ fn capability_wildcard_mock() {
     };
     assert!(cap.resource.ends_with("/*"));
     assert!(cap.rights.contains(Rights::READ));
+}
+
+// ============================================================================
+// Phase 1: Host Shim integration (new types)
+// ============================================================================
+
+#[test]
+fn tc_01_021_mock_platform_event_flow() {
+    let mut mock = MockPlatform::new();
+    mock.init().unwrap();
+
+    let win = mock.create_window(WindowConfig::default()).unwrap();
+    assert_eq!(win, WindowId(1));
+
+    mock.push_event(HostEvent::Resize {
+        window: win,
+        width: 1920,
+        height: 1080,
+    });
+    mock.push_event(HostEvent::Input(InputEvent::MouseMove { x: 100.0, y: 200.0 }));
+
+    let events = mock.poll_events();
+    assert_eq!(events.len(), 2);
+    assert!(matches!(events[0], HostEvent::Resize { width: 1920, height: 1080, .. }));
+    assert!(matches!(events[1], HostEvent::Input(InputEvent::MouseMove { .. })));
+}
+
+#[test]
+fn tc_01_022_panic_exit_event() {
+    let mut mock = MockPlatform::new();
+    mock.push_event(HostEvent::PanicExit);
+
+    let events = mock.poll_events();
+    assert_eq!(events.len(), 1);
+    assert!(matches!(events[0], HostEvent::PanicExit));
+}
+
+#[test]
+fn tc_01_023_host_backend_trait_object() {
+    let mut backend: Box<dyn HostBackend> = Box::new(MockPlatform::new());
+    backend.init().unwrap();
+    let win = backend.create_window(WindowConfig::default()).unwrap();
+    assert_eq!(win, WindowId(1));
+    backend.request_exit();
+    backend.shutdown();
+}
+
+#[test]
+fn tc_01_024_run_delivers_events_via_callback() {
+    let mut mock = MockPlatform::new();
+    mock.push_event(HostEvent::Close { window: WindowId(7) });
+    mock.push_event(HostEvent::Focus { window: WindowId(7), focused: true });
+
+    let mut collected = Vec::new();
+    mock.run(&mut |ev| collected.push(ev)).unwrap();
+
+    assert_eq!(collected.len(), 2);
+    assert!(matches!(collected[0], HostEvent::Close { window: WindowId(7) }));
+    assert!(matches!(collected[1], HostEvent::Focus { window: WindowId(7), focused: true }));
 }

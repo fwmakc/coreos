@@ -1,8 +1,13 @@
 //! Text renderer: fontdue rasterisation + single wgpu pipeline.
 
+use tracing::warn;
+
 use super::GraphicsContext;
 
 const MAX_TEXT_VERTICES: usize = 6 * 1024;
+const ATLAS_MIN_SIZE: u32 = 64;
+const ATLAS_MAX_SIZE: u32 = 2048;
+const GLYPH_PADDING: u32 = 2;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -214,6 +219,13 @@ impl TextRenderer {
             if let Some((verts, atlas_data, w, h)) =
                 self.layout_text(entry, &screen_to_ndc)
             {
+                if all_vertices.len() + verts.len() > MAX_TEXT_VERTICES {
+                    warn!(
+                        "text vertex buffer full at {} vertices, dropping text entry",
+                        all_vertices.len()
+                    );
+                    continue;
+                }
                 let count = verts.len() as u32;
                 let (texture, bind_group) = self.upload_atlas(ctx, &atlas_data, w, h);
                 all_vertices.extend_from_slice(&verts);
@@ -234,18 +246,17 @@ impl TextRenderer {
         entry: &TextEntry<'_>,
         screen_to_ndc: &impl Fn(f32, f32) -> [f32; 2],
     ) -> Option<(Vec<TextVertex>, Vec<u8>, u32, u32)> {
-        let padding = 2u32;
         let mut pen_x = 0u32;
         let mut max_height = 0u32;
 
         for c in entry.text.chars() {
             let (metrics, _) = self.font.rasterize(c, entry.font_size);
-            pen_x += metrics.width as u32 + padding;
+            pen_x += metrics.width as u32 + GLYPH_PADDING;
             max_height = max_height.max(metrics.height as u32);
         }
 
-        let atlas_width = pen_x.next_power_of_two().clamp(64, 2048);
-        let atlas_height = max_height.next_power_of_two().clamp(64, 2048);
+        let atlas_width = pen_x.next_power_of_two().clamp(ATLAS_MIN_SIZE, ATLAS_MAX_SIZE);
+        let atlas_height = max_height.next_power_of_two().clamp(ATLAS_MIN_SIZE, ATLAS_MAX_SIZE);
 
         let mut atlas_data = vec![0u8; (atlas_width * atlas_height) as usize];
         let mut char_info = Vec::new();
@@ -267,7 +278,7 @@ impl TextRenderer {
             }
 
             char_info.push((pen_x, w, h, metrics));
-            pen_x += w + padding;
+            pen_x += w + GLYPH_PADDING;
         }
 
         let mut vertices = Vec::new();
@@ -384,5 +395,23 @@ impl TextRenderer {
 
     pub fn pipeline(&self) -> &wgpu::RenderPipeline {
         &self.pipeline
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn text_vertex_size_matches_layout() {
+        let expected = std::mem::size_of::<[f32; 2]>()  // position
+            + std::mem::size_of::<[f32; 2]>()            // tex_coords
+            + std::mem::size_of::<[f32; 4]>();            // color
+        assert_eq!(std::mem::size_of::<TextVertex>(), expected);
+    }
+
+    #[test]
+    fn text_vertex_is_32_bytes() {
+        assert_eq!(std::mem::size_of::<TextVertex>(), 32);
     }
 }

@@ -48,8 +48,8 @@ pub fn levenshtein(a: &str, b: &str) -> usize {
     let mut prev = vec![0usize; b_len + 1];
     let mut curr = vec![0usize; b_len + 1];
 
-    for j in 0..=b_len {
-        prev[j] = j;
+    for (j, item) in prev.iter_mut().enumerate().take(b_len + 1) {
+        *item = j;
     }
 
     for (i, a_ch) in a.chars().enumerate() {
@@ -118,7 +118,7 @@ pub fn score(query: &str, candidate: &str) -> Option<SearchResult> {
 }
 
 /// Search a haystack and return ranked results.
-pub fn search<'a>(query: &str, haystack: &[&'a str]) -> Vec<SearchResult> {
+pub fn search(query: &str, haystack: &[&str]) -> Vec<SearchResult> {
     let mut results: Vec<SearchResult> = haystack
         .iter()
         .filter_map(|c| score(query, c))

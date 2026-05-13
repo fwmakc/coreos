@@ -1,5 +1,7 @@
 //! Shape renderer: cursor, circles, and UI panels via a single GPU pipeline.
 
+use tracing::warn;
+
 use super::GraphicsContext;
 
 const MAX_SHAPES: usize = 10_000;
@@ -23,6 +25,16 @@ pub enum Shape {
     Rect { x: f32, y: f32, w: f32, h: f32, color: [f32; 4] },
     /// Circle drawn with discard in fragment shader.
     Circle { x: f32, y: f32, radius: f32, color: [f32; 4] },
+}
+
+struct QuadBounds {
+    left: f32,
+    right: f32,
+    top: f32,
+    bottom: f32,
+    color: [f32; 4],
+    center: [f32; 2],
+    radius: f32,
 }
 
 /// GPU pipeline and buffer for shape quads.
@@ -123,52 +135,58 @@ impl ShapeRenderer {
 
     /// Push a shape to be drawn this frame.
     pub fn push(&mut self, shape: &Shape, screen_to_ndc: impl Fn(f32, f32) -> [f32; 2]) {
+        if self.vertices.len() + VERTICES_PER_QUAD > MAX_VERTICES {
+            warn!("shape vertex buffer full, dropping shape");
+            return;
+        }
         match *shape {
             Shape::Rect { x, y, w, h, color } => {
                 let left = screen_to_ndc(x, y + h)[0];
                 let right = screen_to_ndc(x + w, y + h)[0];
                 let top = screen_to_ndc(x, y)[1];
                 let bottom = screen_to_ndc(x, y + h)[1];
-                self.push_quad(left, right, top, bottom, color, [0.0; 2], 0.0);
+                self.push_quad(QuadBounds {
+                    left,
+                    right,
+                    top,
+                    bottom,
+                    color,
+                    center: [0.0; 2],
+                    radius: 0.0,
+                });
             }
             Shape::Circle { x, y, radius, color } => {
                 let [cx, cy] = screen_to_ndc(x, y);
                 let [rx, _] = screen_to_ndc(x + radius, y);
                 let r_ndc = rx - cx;
-                let left = cx - r_ndc;
-                let right = cx + r_ndc;
-                let top = cy + r_ndc;
-                let bottom = cy - r_ndc;
-                self.push_quad(left, right, top, bottom, color, [cx, cy], r_ndc);
+                self.push_quad(QuadBounds {
+                    left: cx - r_ndc,
+                    right: cx + r_ndc,
+                    top: cy + r_ndc,
+                    bottom: cy - r_ndc,
+                    color,
+                    center: [cx, cy],
+                    radius: r_ndc,
+                });
             }
         }
     }
 
-    #[allow(clippy::too_many_arguments)]
-    fn push_quad(
-        &mut self,
-        left: f32,
-        right: f32,
-        top: f32,
-        bottom: f32,
-        color: [f32; 4],
-        center: [f32; 2],
-        radius: f32,
-    ) {
+    fn push_quad(&mut self, b: QuadBounds) {
         let v = |x, y| ShapeVertex {
             position: [x, y],
-            center,
-            radius,
+            center: b.center,
+            radius: b.radius,
             _pad: 0.0,
-            color,
+            color: b.color,
         };
         self.vertices.extend_from_slice(&[
-            v(left, bottom),
-            v(right, bottom),
-            v(left, top),
-            v(right, bottom),
-            v(right, top),
-            v(left, top),
+            v(b.left, b.bottom),
+            v(b.right, b.bottom),
+            v(b.left, b.top),
+            v(b.right, b.bottom),
+            v(b.right, b.top),
+            v(b.left, b.top),
         ]);
     }
 
@@ -183,19 +201,34 @@ impl ShapeRenderer {
         }
     }
 
-    /// Number of vertices queued this frame.
-    pub fn vertex_count(&self) -> u32 {
-        self.vertices.len() as u32
-    }
-
     /// Record draw commands into the render pass.
     pub fn render<'a>(&'a self, pass: &mut wgpu::RenderPass<'a>) {
-        let count = self.vertex_count();
+        let count = self.vertices.len() as u32;
         if count == 0 {
             return;
         }
         pass.set_pipeline(&self.pipeline);
         pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         pass.draw(0..count, 0..1);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn shape_vertex_size_matches_layout() {
+        let expected = std::mem::size_of::<[f32; 2]>()  // position
+            + std::mem::size_of::<[f32; 2]>()            // center
+            + std::mem::size_of::<f32>()                  // radius
+            + std::mem::size_of::<f32>()                  // _pad
+            + std::mem::size_of::<[f32; 4]>();            // color
+        assert_eq!(std::mem::size_of::<ShapeVertex>(), expected);
+    }
+
+    #[test]
+    fn shape_vertex_is_40_bytes() {
+        assert_eq!(std::mem::size_of::<ShapeVertex>(), 40);
     }
 }

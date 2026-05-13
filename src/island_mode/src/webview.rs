@@ -60,7 +60,7 @@ mod tests {
 
     #[test]
     fn web_engine_variants() {
-        let engines = vec![
+        let engines = [
             WebEngine::CEF,
             WebEngine::WebKit,
             WebEngine::WebView2,

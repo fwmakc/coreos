@@ -67,24 +67,50 @@ os/
 
 ### Build Commands
 
-```bash
+#### Windows (native)
+
+```powershell
 # Phase 0 Demo (Rust + wgpu + winit)
-cd src && cargo run --bin demo
+cd src; cargo run --bin demo
 
 # Host Shim & Display Server (Rust)
-cd src/host_shim && cargo build
-cd src/display_server && cargo build
+cd src/host_shim; cargo build
+cd src/display_server; cargo build
 
 # Micro-Kernel & Runtime (Bun/TypeScript)
-cd src/micro_kernel && bun install && bun run build
+cd src/micro_kernel; bun install; bun run build
 
 # Run tests
 cargo test
 bun test
 
-# Linting (must pass on Windows AND Linux/WSL)
+# Linting (must pass on Windows AND WSL before committing)
 cargo clippy -- -D warnings
 ```
+
+#### WSL Ubuntu (cross-platform verification)
+
+```bash
+# Build (from /mnt/c mount — slower I/O, ~25s cold)
+wsl -d Ubuntu -- bash -c "source ~/.cargo/env && cd /mnt/c/dev/games/ts/coreos/src && cargo build --bin demo"
+
+# Run tests
+wsl -d Ubuntu -- bash -c "source ~/.cargo/env && cd /mnt/c/dev/games/ts/coreos/src && cargo test"
+
+# Linting
+wsl -d Ubuntu -- bash -c "source ~/.cargo/env && cd /mnt/c/dev/games/ts/coreos/src && cargo clippy -- -D warnings"
+
+# Run demo (WSLg required for window display)
+wsl -d Ubuntu -- bash -c "source ~/.cargo/env && DISPLAY=:0 RUST_LOG=warn /mnt/c/dev/games/ts/coreos/src/target/debug/demo"
+
+# Run demo in background
+wsl -d Ubuntu -- bash -c "source ~/.cargo/env && DISPLAY=:0 RUST_LOG=warn setsid /mnt/c/dev/games/ts/coreos/src/target/debug/demo </dev/null >/tmp/coreos-demo.log 2>&1 &"
+
+# Kill background demo
+wsl -d Ubuntu -- pkill -f "target/debug/demo"
+```
+
+> **Note:** WSL uses Mesa llvmpipe (CPU Vulkan) — expect ~25 FPS instead of 60. GPU passthrough (dxgkrnl) is not enabled by default. The WSL distro is `Ubuntu` (verify with `wsl --list --verbose`).
 
 ## Coding Standards
 

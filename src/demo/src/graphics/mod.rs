@@ -25,6 +25,11 @@ impl GraphicsContext {
         let size = window.inner_size();
 
         let instance = wgpu::Instance::default();
+        // SAFETY: The window is a valid winit Window that outlives this
+        // GraphicsContext. The raw window handle is only used to create the
+        // wgpu surface and is not stored beyond this call. wgpu takes its own
+        // reference to the underlying platform window, keeping it alive for
+        // as long as the Surface exists (which is owned by GraphicsContext).
         let surface = unsafe {
             instance.create_surface_unsafe(
                 wgpu::SurfaceTargetUnsafe::from_window(&window).unwrap(),
@@ -48,7 +53,7 @@ impl GraphicsContext {
                 &wgpu::DeviceDescriptor {
                     label: Some("Demo Device"),
                     required_features: wgpu::Features::empty(),
-                    required_limits: wgpu::Limits::downlevel_defaults(),
+                    required_limits: wgpu::Limits::default(),
                     memory_hints: wgpu::MemoryHints::Performance,
                 },
                 None,

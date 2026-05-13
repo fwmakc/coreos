@@ -2,21 +2,52 @@
 //!
 //! Run with: `cargo test --test winit_integration -- --ignored --test-threads=1`
 
-use winit::event_loop::EventLoop;
+use winit::application::ApplicationHandler;
+use winit::event_loop::{ActiveEventLoop, EventLoop};
 use winit::window::WindowAttributes;
 
-/// TC-01-001: Create a real 800×600 window via winit.
+struct WindowCollector {
+    window: Option<winit::window::Window>,
+    attrs: WindowAttributes,
+}
+
+impl ApplicationHandler for WindowCollector {
+    fn resumed(&mut self, event_loop: &ActiveEventLoop) {
+        if self.window.is_none() {
+            self.window = Some(event_loop.create_window(self.attrs.clone()).unwrap());
+        }
+    }
+
+    fn window_event(
+        &mut self,
+        event_loop: &ActiveEventLoop,
+        _window_id: winit::window::WindowId,
+        event: winit::event::WindowEvent,
+    ) {
+        if matches!(event, winit::event::WindowEvent::CloseRequested) {
+            event_loop.exit();
+        }
+    }
+}
+
+fn create_window_with_attrs(attrs: WindowAttributes) -> winit::window::Window {
+    let event_loop = EventLoop::new().unwrap();
+    let mut collector = WindowCollector {
+        window: None,
+        attrs,
+    };
+    event_loop.run_app(&mut collector).unwrap();
+    collector.window.unwrap()
+}
+
+/// TC-01-001: Create a real 800x600 window via winit.
 #[test]
 #[ignore = "requires display server (run with --ignored --test-threads=1)"]
 fn real_window_creation_800x600() {
-    let event_loop = EventLoop::new().unwrap();
-    let window = event_loop
-        .create_window(
-            WindowAttributes::default()
-                .with_title("CORE OS Test")
-                .with_inner_size(winit::dpi::LogicalSize::new(800, 600)),
-        )
-        .unwrap();
+    let attrs = WindowAttributes::default()
+        .with_title("CORE OS Test")
+        .with_inner_size(winit::dpi::LogicalSize::new(800, 600));
+    let window = create_window_with_attrs(attrs);
 
     let size = window.inner_size();
     assert_eq!(size.width, 800);
@@ -28,16 +59,11 @@ fn real_window_creation_800x600() {
 #[test]
 #[ignore = "requires display server"]
 fn real_window_resize() {
-    let event_loop = EventLoop::new().unwrap();
-    let window = event_loop
-        .create_window(
-            WindowAttributes::default()
-                .with_inner_size(winit::dpi::LogicalSize::new(800, 600)),
-        )
-        .unwrap();
+    let attrs = WindowAttributes::default()
+        .with_inner_size(winit::dpi::LogicalSize::new(800, 600));
+    let window = create_window_with_attrs(attrs);
 
     let _ = window.request_inner_size(winit::dpi::PhysicalSize::new(1280, 720));
-    // winit resize is asynchronous; we verify the request was accepted.
     assert!(window.inner_size().width > 0);
 }
 
@@ -45,14 +71,10 @@ fn real_window_resize() {
 #[test]
 #[ignore = "requires display server"]
 fn real_window_dpi_scaling() {
-    let event_loop = EventLoop::new().unwrap();
-    let window = event_loop
-        .create_window(WindowAttributes::default())
-        .unwrap();
+    let window = create_window_with_attrs(WindowAttributes::default());
 
     let scale = window.scale_factor();
     assert!(scale > 0.0);
-    // Typical values: 1.0 (96 DPI), 1.25 (120 DPI), 1.5 (144 DPI), 2.0 (192 DPI)
     assert!((1.0..=4.0).contains(&scale));
 }
 
@@ -60,10 +82,8 @@ fn real_window_dpi_scaling() {
 #[test]
 #[ignore = "requires display server"]
 fn real_window_minimize_maximize_state() {
-    let event_loop = EventLoop::new().unwrap();
-    let window = event_loop.create_window(WindowAttributes::default()).unwrap();
+    let window = create_window_with_attrs(WindowAttributes::default());
 
-    // Window starts normal (not minimized, not maximized).
     assert!(!window.is_minimized().unwrap_or(false));
     assert!(!window.is_maximized());
 }

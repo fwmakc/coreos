@@ -225,7 +225,7 @@ mod tests {
                 &[],
                 |row| row.get::<_, i32>(0),
             )
-            .unwrap()[0].clone();
+            .unwrap()[0];
         assert_eq!(count, 1);
     }
 

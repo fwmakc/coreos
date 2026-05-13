@@ -7,6 +7,9 @@
 
 pub mod backend;
 pub mod events;
+pub mod host_event;
+pub mod logging;
+pub mod platform;
 pub mod window;
 
 /// Host shim version.

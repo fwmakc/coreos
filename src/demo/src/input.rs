@@ -6,6 +6,9 @@ use winit::keyboard::{Key, NamedKey};
 
 use crate::app::TextTarget;
 
+const SCROLL_PIXEL_DIVISOR: f32 = 20.0;
+const SCROLL_SENSITIVITY: f32 = 2.0;
+
 /// High-level command produced from raw input.
 #[derive(Clone, Debug)]
 pub enum Command {
@@ -62,9 +65,9 @@ impl InputHandler {
             WindowEvent::MouseWheel { delta, .. } => {
                 let dy = match delta {
                     MouseScrollDelta::LineDelta(_, y) => *y,
-                    MouseScrollDelta::PixelDelta(p) => p.y as f32 / 20.0,
+                    MouseScrollDelta::PixelDelta(p) => p.y as f32 / SCROLL_PIXEL_DIVISOR,
                 };
-                cmds.push(Command::ResizeCursor(dy * 2.0));
+                cmds.push(Command::ResizeCursor(dy * SCROLL_SENSITIVITY));
             }
             WindowEvent::Resized(size) => {
                 cmds.push(Command::WindowResized(size.width, size.height));

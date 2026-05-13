@@ -14,6 +14,8 @@ wgpu = { workspace = true }
 cpal = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
 # TODO: oboe, ndk-glue
