@@ -24,7 +24,11 @@ fn thread_ipc_roundtrip_latency() {
 
     assert_eq!(response, "pong");
     // On localhost (intra-process) latency should be < 1 ms.
-    assert!(elapsed.as_micros() < 5000, "Latency too high: {:?}", elapsed);
+    assert!(
+        elapsed.as_micros() < 5000,
+        "Latency too high: {:?}",
+        elapsed
+    );
 
     handle.join().unwrap();
 }

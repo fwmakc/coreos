@@ -14,7 +14,10 @@ mod app;
 mod graphics;
 mod input;
 
-use app::{AppState, CMD_FONT_SIZE, CMD_PANEL_COLOR, CMD_PANEL_HEIGHT, CURSOR_COLOR, CommandResult, FONT_SIZE, HELP_TEXT, TEXT_COLOR};
+use app::{
+    AppState, CommandResult, CMD_FONT_SIZE, CMD_PANEL_COLOR, CMD_PANEL_HEIGHT, CURSOR_COLOR,
+    FONT_SIZE, HELP_TEXT, TEXT_COLOR,
+};
 
 use graphics::shape::{Shape, ShapeRenderer};
 use graphics::text::{TextEntry, TextRenderer};
@@ -62,7 +65,11 @@ impl DemoApp {
         let ctx = pollster::block_on(GraphicsContext::new(window));
         let shapes = ShapeRenderer::new(&ctx);
         let text_renderer = TextRenderer::new(&ctx);
-        self.gpu = Some(GpuResources { ctx, shapes, text_renderer });
+        self.gpu = Some(GpuResources {
+            ctx,
+            shapes,
+            text_renderer,
+        });
     }
 
     fn handle_command(&mut self, cmd: Command, elwt: &ActiveEventLoop) {
@@ -149,7 +156,9 @@ impl DemoApp {
         if elapsed >= 1.0 {
             let fps = self.frame_count as f64 / elapsed;
             if let Some(gpu) = &self.gpu {
-                gpu.ctx.window().set_title(&format!("CORE OS Demo — {:.0} FPS", fps));
+                gpu.ctx
+                    .window()
+                    .set_title(&format!("CORE OS Demo — {:.0} FPS", fps));
             }
             self.frame_count = 0;
             self.last_frame_time = now;
@@ -302,11 +311,7 @@ fn build_text_entries<'a>(app: &'a AppState, h: f32) -> Vec<TextEntry<'a>> {
     entries
 }
 
-fn render_frame(
-    ctx: &mut GraphicsContext,
-    shapes: &ShapeRenderer,
-    text_renderer: &TextRenderer,
-) {
+fn render_frame(ctx: &mut GraphicsContext, shapes: &ShapeRenderer, text_renderer: &TextRenderer) {
     let output = match ctx.acquire_frame() {
         Ok(f) => f,
         Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
@@ -349,9 +354,7 @@ fn render_frame(
 }
 
 fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     info!("CORE OS Phase 0 — Playable Demo starting...");
 

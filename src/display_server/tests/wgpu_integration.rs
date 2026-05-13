@@ -34,8 +34,9 @@ fn wgpu_adapter_request() {
 #[ignore = "requires display server + GPU"]
 fn wgpu_surface_creation() {
     let instance = Instance::default();
-    let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
-        .expect("No adapter");
+    let adapter =
+        pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
+            .expect("No adapter");
 
     // We can't create a real surface without a window, but we can query adapter limits.
     let limits = adapter.limits();
@@ -47,8 +48,9 @@ fn wgpu_surface_creation() {
 #[ignore = "requires GPU or software rasterizer"]
 fn wgpu_device_and_queue_creation() {
     let instance = Instance::default();
-    let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
-        .expect("No adapter");
+    let adapter =
+        pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
+            .expect("No adapter");
 
     let (device, queue) = pollster::block_on(adapter.request_device(
         &wgpu::DeviceDescriptor {

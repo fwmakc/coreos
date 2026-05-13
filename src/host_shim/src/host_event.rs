@@ -105,7 +105,9 @@ mod tests {
 
     #[test]
     fn host_event_close() {
-        let ev = HostEvent::Close { window: WindowId(2) };
+        let ev = HostEvent::Close {
+            window: WindowId(2),
+        };
         assert!(matches!(ev, HostEvent::Close { .. }));
     }
 
@@ -123,9 +125,15 @@ mod tests {
 
     #[test]
     fn host_event_minimize_maximize_restore() {
-        let mini = HostEvent::Minimize { window: WindowId(4) };
-        let maxi = HostEvent::Maximize { window: WindowId(4) };
-        let rest = HostEvent::Restore { window: WindowId(4) };
+        let mini = HostEvent::Minimize {
+            window: WindowId(4),
+        };
+        let maxi = HostEvent::Maximize {
+            window: WindowId(4),
+        };
+        let rest = HostEvent::Restore {
+            window: WindowId(4),
+        };
         assert!(matches!(mini, HostEvent::Minimize { .. }));
         assert!(matches!(maxi, HostEvent::Maximize { .. }));
         assert!(matches!(rest, HostEvent::Restore { .. }));

@@ -15,7 +15,7 @@ version = "0.1.0-alpha.1"
 authors = ["CORE OS Team <team@coreos.dev>"]
 license = "Apache-2.0"
 edition = "2021"
-repository = "https://github.com/coreos/workspace"
+repository = "https://github.com/fwmakc/workspace"
 homepage = "https://coreos.dev"
 rust-version = "1.78"
 

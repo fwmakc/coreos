@@ -56,9 +56,7 @@ pub fn levenshtein(a: &str, b: &str) -> usize {
         curr[0] = i + 1;
         for (j, b_ch) in b.chars().enumerate() {
             let cost = if a_ch == b_ch { 0 } else { 1 };
-            curr[j + 1] = (curr[j] + 1)
-                .min(prev[j + 1] + 1)
-                .min(prev[j] + cost);
+            curr[j + 1] = (curr[j] + 1).min(prev[j + 1] + 1).min(prev[j] + cost);
         }
         std::mem::swap(&mut prev, &mut curr);
     }
@@ -119,10 +117,7 @@ pub fn score(query: &str, candidate: &str) -> Option<SearchResult> {
 
 /// Search a haystack and return ranked results.
 pub fn search(query: &str, haystack: &[&str]) -> Vec<SearchResult> {
-    let mut results: Vec<SearchResult> = haystack
-        .iter()
-        .filter_map(|c| score(query, c))
-        .collect();
+    let mut results: Vec<SearchResult> = haystack.iter().filter_map(|c| score(query, c)).collect();
     results.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
     results
 }
@@ -209,7 +204,7 @@ mod tests {
         let results = search("command", &refs);
         assert!(!results.is_empty());
         assert_eq!(results.len(), 1000); // all match by prefix
-        // P99 latency assertion would require criterion benchmark; here we verify correctness.
+                                         // P99 latency assertion would require criterion benchmark; here we verify correctness.
     }
 
     #[test]

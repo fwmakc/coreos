@@ -134,7 +134,7 @@ User Input (winit)
 
 ### Зависимости от других этапов
 - **Phase 1 (Host Shim)** — демо переиспользует `events.rs` (InputEvent, KeyState, MouseButton) и `window.rs` (WindowConfig) как типы, но не использует `HostBackend` trait.
-- **Phase 9 (Display Server)** — демо использует `wgpu` напрямую, а не через `coreos-display-server`. Это сознательное упрощение для скорости.
+- **Phase 9 (Display Server)** — демо использует `wgpu` напрямую, а не через `w-display-server`. Это сознательное упрощение для скорости.
 
 ---
 
@@ -162,7 +162,7 @@ User Input (winit)
 
 ## Артефакты
 
-- `src/demo/` — исходный код демо (crate `coreos-demo`).
+- `src/demo/` — исходный код демо (crate `w-demo`).
 - `archive/demo/` — архивная копия после завершения Phase 0.
 - Видео `demo-walkthrough.mp4` — 30-секундная запись экрана.
 

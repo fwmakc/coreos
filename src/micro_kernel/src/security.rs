@@ -64,8 +64,14 @@ mod tests {
 
     #[test]
     fn capability_equality() {
-        let cap1 = Capability { resource: "fs:/tmp".into(), rights: Rights::READ };
-        let cap2 = Capability { resource: "fs:/tmp".into(), rights: Rights::READ };
+        let cap1 = Capability {
+            resource: "fs:/tmp".into(),
+            rights: Rights::READ,
+        };
+        let cap2 = Capability {
+            resource: "fs:/tmp".into(),
+            rights: Rights::READ,
+        };
         assert_eq!(cap1, cap2);
     }
 
@@ -73,15 +79,27 @@ mod tests {
     fn capability_hash() {
         use std::collections::HashSet;
         let mut set = HashSet::new();
-        set.insert(Capability { resource: "net:*".into(), rights: Rights::WRITE });
-        set.insert(Capability { resource: "net:*".into(), rights: Rights::WRITE });
+        set.insert(Capability {
+            resource: "net:*".into(),
+            rights: Rights::WRITE,
+        });
+        set.insert(Capability {
+            resource: "net:*".into(),
+            rights: Rights::WRITE,
+        });
         assert_eq!(set.len(), 1);
     }
 
     #[test]
     fn capability_inequality() {
-        let cap1 = Capability { resource: "fs:/tmp".into(), rights: Rights::READ };
-        let cap2 = Capability { resource: "fs:/tmp".into(), rights: Rights::WRITE };
+        let cap1 = Capability {
+            resource: "fs:/tmp".into(),
+            rights: Rights::READ,
+        };
+        let cap2 = Capability {
+            resource: "fs:/tmp".into(),
+            rights: Rights::WRITE,
+        };
         assert_ne!(cap1, cap2);
     }
 }

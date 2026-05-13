@@ -20,16 +20,15 @@ CORE OS is a cross-platform overlay runtime in the **early development** stage. 
 
 ### Source Code (In Progress)
 - **Rust workspace** initialized in `src/` with 6 crates:
-  - `coreos-host-shim` — window, input, audio, storage, network abstraction
-  - `coreos-display-server` — WebGPU rendering and compositing
-  - `coreos-micro-kernel` — IPC, capability security, SQLite WAL engine
-  - `coreos-island-mode` — WebView embedding abstraction
-  - `coreos-fuzzy-search` — fuzzy search engine with Levenshtein distance
+  - `w-host-shim` — window, input, audio, storage, network abstraction
+  - `w-display-server` — WebGPU rendering and compositing
+  - `w-micro-kernel` — IPC, capability security, SQLite WAL engine
+  - `w-island-mode` — WebView embedding abstraction
+  - `w-fuzzy-search` — fuzzy search engine with Levenshtein distance
   - `integration_tests` — cross-crate integration test suite
 - **CI/CD:** GitHub Actions configured for Rust build/test/lint across Linux, Windows, macOS
 
 ### What Does NOT Exist Yet
-- No playable demo binary (Phase 0 in progress)
 - No TypeScript runtime modules
 - No P2P mesh, CRDT engine, or AI pipelines
 - No installer or release artifacts

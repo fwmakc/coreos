@@ -59,8 +59,7 @@ fn real_window_creation_800x600() {
 #[test]
 #[ignore = "requires display server"]
 fn real_window_resize() {
-    let attrs = WindowAttributes::default()
-        .with_inner_size(winit::dpi::LogicalSize::new(800, 600));
+    let attrs = WindowAttributes::default().with_inner_size(winit::dpi::LogicalSize::new(800, 600));
     let window = create_window_with_attrs(attrs);
 
     let _ = window.request_inner_size(winit::dpi::PhysicalSize::new(1280, 720));

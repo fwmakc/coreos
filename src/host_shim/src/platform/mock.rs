@@ -114,7 +114,9 @@ mod tests {
     fn mock_poll_events_drains_queue() {
         let mut mock = MockPlatform::new();
         mock.push_event(HostEvent::PanicExit);
-        mock.push_event(HostEvent::Close { window: WindowId(1) });
+        mock.push_event(HostEvent::Close {
+            window: WindowId(1),
+        });
 
         let batch1 = mock.poll_events();
         assert_eq!(batch1.len(), 2);
@@ -182,7 +184,9 @@ mod tests {
     fn mock_run_delivers_panic_exit() {
         let mut mock = MockPlatform::new();
         mock.push_event(HostEvent::PanicExit);
-        mock.push_event(HostEvent::Close { window: WindowId(1) });
+        mock.push_event(HostEvent::Close {
+            window: WindowId(1),
+        });
 
         let mut collected = Vec::new();
         mock.run(&mut |ev| collected.push(ev)).unwrap();

@@ -31,9 +31,7 @@ impl GraphicsContext {
         // reference to the underlying platform window, keeping it alive for
         // as long as the Surface exists (which is owned by GraphicsContext).
         let surface = unsafe {
-            instance.create_surface_unsafe(
-                wgpu::SurfaceTargetUnsafe::from_window(&window).unwrap(),
-            )
+            instance.create_surface_unsafe(wgpu::SurfaceTargetUnsafe::from_window(&window).unwrap())
         }
         .expect("failed to create surface");
 
@@ -142,9 +140,7 @@ impl GraphicsContext {
     /// Create a new command encoder.
     pub fn create_encoder(&self, label: &str) -> wgpu::CommandEncoder {
         self.device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some(label),
-            })
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some(label) })
     }
 
     /// Write data to a buffer.

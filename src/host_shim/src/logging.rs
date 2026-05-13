@@ -21,9 +21,7 @@ pub fn init_logging() -> Result<(), crate::backend::HostError> {
         .append(true)
         .open(&log_file)
         .map_err(|e| {
-            crate::backend::HostError::WindowCreationFailed(format!(
-                "log file open failed: {e}"
-            ))
+            crate::backend::HostError::WindowCreationFailed(format!("log file open failed: {e}"))
         })?;
 
     let env_filter = tracing_subscriber::EnvFilter::try_from_env("CORE_LOG")
@@ -48,18 +46,15 @@ fn log_directory() -> Result<PathBuf, crate::backend::HostError> {
     #[cfg(target_os = "windows")]
     {
         let local_app_data = std::env::var("LOCALAPPDATA").map_err(|_| {
-            crate::backend::HostError::WindowCreationFailed(
-                "LOCALAPPDATA not set".into(),
-            )
+            crate::backend::HostError::WindowCreationFailed("LOCALAPPDATA not set".into())
         })?;
         Ok(PathBuf::from(local_app_data).join("CoreOS").join("logs"))
     }
 
     #[cfg(target_os = "linux")]
     {
-        let home = std::env::var("HOME").map_err(|_| {
-            crate::backend::HostError::WindowCreationFailed("HOME not set".into())
-        })?;
+        let home = std::env::var("HOME")
+            .map_err(|_| crate::backend::HostError::WindowCreationFailed("HOME not set".into()))?;
         Ok(PathBuf::from(home)
             .join(".local")
             .join("share")
@@ -69,9 +64,8 @@ fn log_directory() -> Result<PathBuf, crate::backend::HostError> {
 
     #[cfg(target_os = "macos")]
     {
-        let home = std::env::var("HOME").map_err(|_| {
-            crate::backend::HostError::WindowCreationFailed("HOME not set".into())
-        })?;
+        let home = std::env::var("HOME")
+            .map_err(|_| crate::backend::HostError::WindowCreationFailed("HOME not set".into()))?;
         Ok(PathBuf::from(home)
             .join("Library")
             .join("Application Support")

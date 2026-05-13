@@ -40,11 +40,7 @@ pub(crate) struct AtlasMetrics {
 }
 
 /// Rasterize glyphs into a horizontal atlas buffer and extract per-glyph metrics.
-pub(crate) fn rasterize_atlas(
-    font: &fontdue::Font,
-    text: &str,
-    font_size: f32,
-) -> AtlasMetrics {
+pub(crate) fn rasterize_atlas(font: &fontdue::Font, text: &str, font_size: f32) -> AtlasMetrics {
     let mut pen_x = 0u32;
     let mut max_height = 0u32;
 
@@ -54,8 +50,12 @@ pub(crate) fn rasterize_atlas(
         max_height = max_height.max(metrics.height as u32);
     }
 
-    let atlas_width = pen_x.next_power_of_two().clamp(ATLAS_MIN_SIZE, ATLAS_MAX_SIZE);
-    let atlas_height = max_height.next_power_of_two().clamp(ATLAS_MIN_SIZE, ATLAS_MAX_SIZE);
+    let atlas_width = pen_x
+        .next_power_of_two()
+        .clamp(ATLAS_MIN_SIZE, ATLAS_MAX_SIZE);
+    let atlas_height = max_height
+        .next_power_of_two()
+        .clamp(ATLAS_MIN_SIZE, ATLAS_MAX_SIZE);
 
     let mut atlas_data = vec![0u8; (atlas_width * atlas_height) as usize];
     let mut glyphs = Vec::with_capacity(text.len());

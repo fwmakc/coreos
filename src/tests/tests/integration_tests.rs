@@ -264,7 +264,10 @@ fn tc_15_006_fuzzy_exact_match() {
 fn tc_15_007_fuzzy_prefix_match() {
     let query = "calc";
     let candidates = vec!["calculator", "calendar", "clock"];
-    let matches: Vec<_> = candidates.into_iter().filter(|c| c.starts_with(query)).collect();
+    let matches: Vec<_> = candidates
+        .into_iter()
+        .filter(|c| c.starts_with(query))
+        .collect();
     assert_eq!(matches, vec!["calculator"]);
 }
 
@@ -280,10 +283,13 @@ fn tc_15_009_fuzzy_levenshtein_mock() {
     let query = "calemdar";
     let candidates = ["calendar", "calculator"];
     // Placeholder: real test would use levenshtein distance.
-    let top = candidates.iter().min_by_key(|c| {
-        let dist = c.chars().zip(query.chars()).filter(|(a, b)| a != b).count();
-        dist as i32
-    }).unwrap();
+    let top = candidates
+        .iter()
+        .min_by_key(|c| {
+            let dist = c.chars().zip(query.chars()).filter(|(a, b)| a != b).count();
+            dist as i32
+        })
+        .unwrap();
     assert_eq!(*top, "calendar");
 }
 
@@ -291,7 +297,10 @@ fn tc_15_009_fuzzy_levenshtein_mock() {
 fn tc_15_010_fuzzy_no_match() {
     let query = "xyz123";
     let candidates = vec!["calculator", "calendar"];
-    let matches: Vec<_> = candidates.into_iter().filter(|c| c.contains(query)).collect();
+    let matches: Vec<_> = candidates
+        .into_iter()
+        .filter(|c| c.contains(query))
+        .collect();
     assert!(matches.is_empty());
 }
 
@@ -370,7 +379,10 @@ fn renderer_surface_stress_resize_sequence() {
 #[test]
 fn ipc_error_variants_display_correctly() {
     assert_eq!(format!("{}", IpcError::Disconnected), "IPC connection lost");
-    assert_eq!(format!("{}", IpcError::PermissionDenied), "IPC permission denied");
+    assert_eq!(
+        format!("{}", IpcError::PermissionDenied),
+        "IPC permission denied"
+    );
 }
 
 #[test]
@@ -419,12 +431,25 @@ fn tc_01_021_mock_platform_event_flow() {
         width: 1920,
         height: 1080,
     });
-    mock.push_event(HostEvent::Input(InputEvent::MouseMove { x: 100.0, y: 200.0 }));
+    mock.push_event(HostEvent::Input(InputEvent::MouseMove {
+        x: 100.0,
+        y: 200.0,
+    }));
 
     let events = mock.poll_events();
     assert_eq!(events.len(), 2);
-    assert!(matches!(events[0], HostEvent::Resize { width: 1920, height: 1080, .. }));
-    assert!(matches!(events[1], HostEvent::Input(InputEvent::MouseMove { .. })));
+    assert!(matches!(
+        events[0],
+        HostEvent::Resize {
+            width: 1920,
+            height: 1080,
+            ..
+        }
+    ));
+    assert!(matches!(
+        events[1],
+        HostEvent::Input(InputEvent::MouseMove { .. })
+    ));
 }
 
 #[test]
@@ -450,13 +475,29 @@ fn tc_01_023_host_backend_trait_object() {
 #[test]
 fn tc_01_024_run_delivers_events_via_callback() {
     let mut mock = MockPlatform::new();
-    mock.push_event(HostEvent::Close { window: WindowId(7) });
-    mock.push_event(HostEvent::Focus { window: WindowId(7), focused: true });
+    mock.push_event(HostEvent::Close {
+        window: WindowId(7),
+    });
+    mock.push_event(HostEvent::Focus {
+        window: WindowId(7),
+        focused: true,
+    });
 
     let mut collected = Vec::new();
     mock.run(&mut |ev| collected.push(ev)).unwrap();
 
     assert_eq!(collected.len(), 2);
-    assert!(matches!(collected[0], HostEvent::Close { window: WindowId(7) }));
-    assert!(matches!(collected[1], HostEvent::Focus { window: WindowId(7), focused: true }));
+    assert!(matches!(
+        collected[0],
+        HostEvent::Close {
+            window: WindowId(7)
+        }
+    ));
+    assert!(matches!(
+        collected[1],
+        HostEvent::Focus {
+            window: WindowId(7),
+            focused: true
+        }
+    ));
 }

@@ -56,15 +56,15 @@ impl InputHandler {
             WindowEvent::CursorMoved { position, .. } => {
                 cmds.push(Command::CursorMoved(position.x, position.y));
             }
-            WindowEvent::MouseInput { button, state: btn_state, .. }
-                if *btn_state == winit::event::ElementState::Pressed =>
-            {
-                match button {
-                    MouseButton::Left => cmds.push(Command::AddCircle),
-                    MouseButton::Right => cmds.push(Command::ClearCircles),
-                    _ => {}
-                }
-            }
+            WindowEvent::MouseInput {
+                button,
+                state: btn_state,
+                ..
+            } if *btn_state == winit::event::ElementState::Pressed => match button {
+                MouseButton::Left => cmds.push(Command::AddCircle),
+                MouseButton::Right => cmds.push(Command::ClearCircles),
+                _ => {}
+            },
             WindowEvent::MouseWheel { delta, .. } => {
                 let dy = match delta {
                     MouseScrollDelta::LineDelta(_, y) => *y,
@@ -84,12 +84,7 @@ impl InputHandler {
         cmds
     }
 
-    fn handle_key(
-        &self,
-        key: &Key,
-        repeat: bool,
-        command_bar_visible: bool,
-    ) -> Vec<Command> {
+    fn handle_key(&self, key: &Key, repeat: bool, command_bar_visible: bool) -> Vec<Command> {
         let mut cmds = Vec::new();
         match key {
             Key::Named(NamedKey::F1) => {

@@ -25,23 +25,26 @@ pub trait Platform: HostBackend {
     /// window. Events are delivered to the provided callback in real time.
     ///
     /// For mock platforms this simply drains the queued events and returns.
-    fn run(&mut self, event_handler: &mut dyn FnMut(HostEvent)) -> Result<(), crate::backend::HostError>;
+    fn run(
+        &mut self,
+        event_handler: &mut dyn FnMut(HostEvent),
+    ) -> Result<(), crate::backend::HostError>;
 }
 
 // ------------------------------------------------------------------
 // Platform selection
 // ------------------------------------------------------------------
 
-#[cfg(target_os = "windows")]
-mod windows;
-#[cfg(target_os = "linux")]
-mod linux;
-#[cfg(target_os = "macos")]
-mod macos;
 #[cfg(target_os = "android")]
 mod android;
 #[cfg(target_os = "ios")]
 mod ios;
+#[cfg(target_os = "linux")]
+mod linux;
+#[cfg(target_os = "macos")]
+mod macos;
+#[cfg(target_os = "windows")]
+mod windows;
 
 pub mod mock;
 

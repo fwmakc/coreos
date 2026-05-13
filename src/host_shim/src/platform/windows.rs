@@ -122,7 +122,9 @@ impl Platform for WindowsPlatform {
                         };
                         let st = match state {
                             winit::event::ElementState::Pressed => crate::events::KeyState::Pressed,
-                            winit::event::ElementState::Released => crate::events::KeyState::Released,
+                            winit::event::ElementState::Released => {
+                                crate::events::KeyState::Released
+                            }
                         };
                         (self.handler)(HostEvent::Input(crate::events::InputEvent::MouseButton {
                             button: btn,
@@ -195,7 +197,9 @@ impl Platform for WindowsPlatform {
                         };
                         let st = match event.state {
                             winit::event::ElementState::Pressed => crate::events::KeyState::Pressed,
-                            winit::event::ElementState::Released => crate::events::KeyState::Released,
+                            winit::event::ElementState::Released => {
+                                crate::events::KeyState::Released
+                            }
                         };
 
                         // Panic gesture: Ctrl+Shift+Escape
@@ -233,21 +237,22 @@ impl Platform for WindowsPlatform {
             }
         }
 
-        let event_loop = EventLoop::new().map_err(|e| {
-            HostError::WindowCreationFailed(e.to_string())
-        })?;
+        let event_loop =
+            EventLoop::new().map_err(|e| HostError::WindowCreationFailed(e.to_string()))?;
         event_loop.set_control_flow(ControlFlow::Poll);
 
         let mut app = App {
             window: None,
             handler: event_handler,
             exit_requested: false,
-            core_window_id: self.create_window(WindowConfig::default()).unwrap_or(WindowId(0)),
+            core_window_id: self
+                .create_window(WindowConfig::default())
+                .unwrap_or(WindowId(0)),
             modifiers: winit::keyboard::ModifiersState::empty(),
         };
 
-        event_loop.run_app(&mut app).map_err(|e| {
-            HostError::WindowCreationFailed(e.to_string())
-        })
+        event_loop
+            .run_app(&mut app)
+            .map_err(|e| HostError::WindowCreationFailed(e.to_string()))
     }
 }

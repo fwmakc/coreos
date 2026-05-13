@@ -22,9 +22,20 @@ pub struct ShapeVertex {
 #[derive(Clone, Copy, Debug)]
 pub enum Shape {
     /// Filled rectangle (no discard).
-    Rect { x: f32, y: f32, w: f32, h: f32, color: [f32; 4] },
+    Rect {
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32,
+        color: [f32; 4],
+    },
     /// Circle drawn with discard in fragment shader.
-    Circle { x: f32, y: f32, radius: f32, color: [f32; 4] },
+    Circle {
+        x: f32,
+        y: f32,
+        radius: f32,
+        color: [f32; 4],
+    },
 }
 
 struct QuadBounds {
@@ -162,7 +173,12 @@ impl ShapeRenderer {
                     aspect: 0.0,
                 });
             }
-            Shape::Circle { x, y, radius, color } => {
+            Shape::Circle {
+                x,
+                y,
+                radius,
+                color,
+            } => {
                 let [cx, cy] = screen_to_ndc(x, y);
                 let [rx, _] = screen_to_ndc(x + radius, y);
                 let [_, ry] = screen_to_ndc(x, y + radius);
@@ -204,11 +220,7 @@ impl ShapeRenderer {
     /// Upload accumulated shapes to the GPU.
     pub fn upload(&self, ctx: &GraphicsContext) {
         if !self.vertices.is_empty() {
-            ctx.write_buffer(
-                &self.vertex_buffer,
-                0,
-                bytemuck::cast_slice(&self.vertices),
-            );
+            ctx.write_buffer(&self.vertex_buffer, 0, bytemuck::cast_slice(&self.vertices));
         }
     }
 
@@ -234,7 +246,7 @@ mod tests {
             + std::mem::size_of::<[f32; 2]>()            // center
             + std::mem::size_of::<f32>()                  // radius
             + std::mem::size_of::<f32>()                  // _pad
-            + std::mem::size_of::<[f32; 4]>();            // color
+            + std::mem::size_of::<[f32; 4]>(); // color
         assert_eq!(std::mem::size_of::<ShapeVertex>(), expected);
     }
 

@@ -275,8 +275,7 @@ impl TextRenderer {
 
             let needs_insert = !self.cache.contains_key(&key);
             if needs_insert {
-                let metrics =
-                    atlas::rasterize_atlas(&self.font, entry.text, entry.font_size);
+                let metrics = atlas::rasterize_atlas(&self.font, entry.text, entry.font_size);
                 let (texture, bind_group) = self.upload_atlas(ctx, &metrics);
                 self.cache.insert(
                     key.clone(),
@@ -346,7 +345,10 @@ impl TextRenderer {
         for call in &self.pending {
             let cached = &self.cache[&call.key];
             pass.set_bind_group(0, &cached.bind_group, &[]);
-            pass.draw(call.vertex_offset..call.vertex_offset + call.vertex_count, 0..1);
+            pass.draw(
+                call.vertex_offset..call.vertex_offset + call.vertex_count,
+                0..1,
+            );
         }
     }
 }

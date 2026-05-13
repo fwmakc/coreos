@@ -152,14 +152,23 @@ impl StorageEngine {
     }
 
     /// Run a write query (INSERT, UPDATE, DELETE).
-    pub fn execute(&self, sql: &str, params: &[&dyn rusqlite::ToSql]) -> Result<usize, StorageError> {
+    pub fn execute(
+        &self,
+        sql: &str,
+        params: &[&dyn rusqlite::ToSql],
+    ) -> Result<usize, StorageError> {
         let conn = self.conn.lock().unwrap();
         let rows = conn.execute(sql, params)?;
         Ok(rows)
     }
 
     /// Run a read query and map rows.
-    pub fn query<T, F>(&self, sql: &str, params: &[&dyn rusqlite::ToSql], mut mapper: F) -> Result<Vec<T>, StorageError>
+    pub fn query<T, F>(
+        &self,
+        sql: &str,
+        params: &[&dyn rusqlite::ToSql],
+        mut mapper: F,
+    ) -> Result<Vec<T>, StorageError>
     where
         F: FnMut(&rusqlite::Row<'_>) -> Result<T, rusqlite::Error>,
     {
@@ -201,7 +210,11 @@ mod tests {
         // In-memory databases may report 'memory' even after WAL pragma;
         // file-backed databases report 'wal'. Both are acceptable for this test.
         let journal_lower = journal.to_lowercase();
-        assert!(journal_lower == "wal" || journal_lower == "memory", "unexpected journal mode: {}", journal);
+        assert!(
+            journal_lower == "wal" || journal_lower == "memory",
+            "unexpected journal mode: {}",
+            journal
+        );
     }
 
     #[test]
@@ -278,7 +291,10 @@ mod tests {
         let mut engine = StorageEngine::open_in_memory().unwrap();
         engine
             .migrate(1, |tx| {
-                tx.execute("CREATE TABLE counters (id INTEGER PRIMARY KEY, val INTEGER);", [])?;
+                tx.execute(
+                    "CREATE TABLE counters (id INTEGER PRIMARY KEY, val INTEGER);",
+                    [],
+                )?;
                 tx.execute("INSERT INTO counters (id, val) VALUES (1, 0);", [])?;
                 Ok(())
             })
@@ -291,7 +307,9 @@ mod tests {
 
         // Reader reads concurrently (WAL allows this).
         let val: i32 = engine
-            .query("SELECT val FROM counters WHERE id = 1;", &[], |row| row.get(0))
+            .query("SELECT val FROM counters WHERE id = 1;", &[], |row| {
+                row.get(0)
+            })
             .unwrap()[0];
         assert_eq!(val, 1);
     }
@@ -308,7 +326,9 @@ mod tests {
 
         // Generate WAL entries.
         for i in 0..100 {
-            engine.execute("INSERT INTO t (x) VALUES (?1);", &[&i]).unwrap();
+            engine
+                .execute("INSERT INTO t (x) VALUES (?1);", &[&i])
+                .unwrap();
         }
 
         // Checkpoint must not fail.
@@ -326,7 +346,10 @@ mod tests {
         let mut engine = StorageEngine::open_in_memory().unwrap();
         engine
             .migrate(1, |tx| {
-                tx.execute("CREATE TABLE data (id INTEGER PRIMARY KEY, payload TEXT);", [])?;
+                tx.execute(
+                    "CREATE TABLE data (id INTEGER PRIMARY KEY, payload TEXT);",
+                    [],
+                )?;
                 Ok(())
             })
             .unwrap();
@@ -341,8 +364,11 @@ mod tests {
         engine.checkpoint_full().unwrap();
 
         let payload: String = engine
-            .query("SELECT payload FROM data WHERE id = 1;", &[], |row| row.get::<_, String>(0))
-            .unwrap()[0].clone();
+            .query("SELECT payload FROM data WHERE id = 1;", &[], |row| {
+                row.get::<_, String>(0)
+            })
+            .unwrap()[0]
+            .clone();
         assert_eq!(payload, "checkpoint-test");
     }
 
@@ -351,7 +377,10 @@ mod tests {
         let mut engine = StorageEngine::open_in_memory().unwrap();
         engine
             .migrate(1, |tx| {
-                tx.execute("CREATE TABLE stress (id INTEGER PRIMARY KEY, n INTEGER);", [])?;
+                tx.execute(
+                    "CREATE TABLE stress (id INTEGER PRIMARY KEY, n INTEGER);",
+                    [],
+                )?;
                 Ok(())
             })
             .unwrap();
@@ -378,7 +407,9 @@ mod tests {
             })
             .unwrap();
 
-        engine.execute("INSERT INTO persistent (val) VALUES (42);", &[]).unwrap();
+        engine
+            .execute("INSERT INTO persistent (val) VALUES (42);", &[])
+            .unwrap();
         engine.checkpoint().unwrap();
 
         // Simulate crash by creating new engine from same in-memory? Not possible.

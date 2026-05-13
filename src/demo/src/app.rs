@@ -203,9 +203,9 @@ impl AppState {
         if self.history.is_empty() {
             return;
         }
-        let idx = self.history_idx.map_or(self.history.len() - 1, |i| {
-            i.saturating_sub(1)
-        });
+        let idx = self
+            .history_idx
+            .map_or(self.history.len() - 1, |i| i.saturating_sub(1));
         if idx < self.history.len() {
             self.history_idx = Some(idx);
             self.command_text = self.history[idx].clone();
@@ -319,7 +319,10 @@ mod tests {
         for c in "resize 32".chars() {
             s.type_char(c, TextTarget::Command);
         }
-        assert_eq!(s.execute_command().unwrap(), CommandResult::ResizeCursor(32.0));
+        assert_eq!(
+            s.execute_command().unwrap(),
+            CommandResult::ResizeCursor(32.0)
+        );
         assert_eq!(s.cursor_size(), 32.0);
     }
 
@@ -329,7 +332,10 @@ mod tests {
         for c in "resize 999".chars() {
             s.type_char(c, TextTarget::Command);
         }
-        assert_eq!(s.execute_command().unwrap(), CommandResult::ResizeCursor(CURSOR_SIZE_MAX));
+        assert_eq!(
+            s.execute_command().unwrap(),
+            CommandResult::ResizeCursor(CURSOR_SIZE_MAX)
+        );
     }
 
     #[test]
