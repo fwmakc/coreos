@@ -26,6 +26,13 @@ pub enum InputEvent {
         /// Pressed or released.
         state: KeyState,
     },
+    /// Mouse scroll wheel.
+    MouseScroll {
+        /// Horizontal scroll delta (positive = right).
+        delta_x: f32,
+        /// Vertical scroll delta (positive = up).
+        delta_y: f32,
+    },
     /// Touch event (mobile).
     Touch {
         /// Touch identifier.
