@@ -90,9 +90,8 @@ jobs:
         uses: DavidAnson/markdownlint-cli2-action@v14
         with:
           globs: |
-            **/*.md
-            !archive/**
-            !.github/ISSUE_TEMPLATE/**
+            *.md
+            src/**/*.md
           config: '.markdownlint.json'
 
       - name: Check broken links
