@@ -2,7 +2,7 @@
 //!
 //! Running this will open a native window and print events to stdout.
 
-use coreos_host_shim::VERSION;
+use workspace_host_shim::VERSION;
 
 fn main() {
     println!("CORE OS Host Shim v{VERSION}");

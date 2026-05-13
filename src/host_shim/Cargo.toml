@@ -1,5 +1,5 @@
 [package]
-name = "coreos-host-shim"
+name = "workspace-host-shim"
 description = "Host OS abstraction layer: window, input, audio, storage, network"
 version.workspace = true
 authors.workspace = true
@@ -24,7 +24,7 @@ tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
 # TODO: objc2, uikit
 
 [lib]
-name = "coreos_host_shim"
+name = "workspace_host_shim"
 path = "src/lib.rs"
 
 [[bin]]

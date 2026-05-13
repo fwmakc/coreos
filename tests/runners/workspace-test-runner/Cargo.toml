@@ -1,5 +1,5 @@
 [package]
-name = "coreos-test-runner"
+name = "workspace-test-runner"
 version = "0.1.0"
 edition = "2021"
 description = "Test runner that maps specification TC-IDs to cargo test results"

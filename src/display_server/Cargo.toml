@@ -1,5 +1,5 @@
 [package]
-name = "coreos-display-server"
+name = "workspace-display-server"
 description = "WebGPU-based display server and compositor"
 version.workspace = true
 authors.workspace = true
@@ -17,5 +17,5 @@ serde = { workspace = true }
 pollster = "0.3"
 
 [lib]
-name = "coreos_display_server"
+name = "workspace_display_server"
 path = "src/lib.rs"

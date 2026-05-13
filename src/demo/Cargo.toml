@@ -1,5 +1,5 @@
 [package]
-name = "coreos-demo"
+name = "workspace-demo"
 version.workspace = true
 authors.workspace = true
 license.workspace = true

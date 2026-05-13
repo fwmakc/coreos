@@ -1,5 +1,5 @@
 [package]
-name = "coreos-fuzzy-search"
+name = "workspace-fuzzy-search"
 description = "Fuzzy search engine with Levenshtein distance and n-gram scoring"
 version.workspace = true
 authors.workspace = true
