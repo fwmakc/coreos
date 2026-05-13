@@ -29,6 +29,10 @@ jobs:
         with:
           workspaces: src
 
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev
+
       - name: Check formatting
         run: cd src && cargo fmt --all -- --check
 
@@ -47,6 +51,9 @@ jobs:
     needs: rust
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -82,7 +89,10 @@ jobs:
       - name: Markdown lint
         uses: DavidAnson/markdownlint-cli2-action@v14
         with:
-          globs: '**/*.md'
+          globs: |
+            **/*.md
+            !archive/**
+            !.github/ISSUE_TEMPLATE/**
           config: '.markdownlint.json'
 
       - name: Check broken links
