@@ -1,52 +1,15 @@
-//! Text renderer: fontdue rasterisation + single wgpu pipeline.
-//!
-//! Glyph atlases are cached by (text, font_size). The expensive rasterization
-//! and GPU texture upload only runs when text content changes. Vertex positions
-//! (which depend on screen position and color) are rebuilt every frame from
-//! cached glyph metrics — this is cheap arithmetic.
+//! GPU text renderer: pipeline, atlas cache, draw calls.
 
 use std::collections::HashMap;
 
 use tracing::warn;
 
-use super::GraphicsContext;
+use crate::graphics::GraphicsContext;
+
+use super::atlas::{self, AtlasKey, AtlasMetrics};
+use super::{TextEntry, TextVertex};
 
 const MAX_TEXT_VERTICES: usize = 6 * 1024;
-const ATLAS_MIN_SIZE: u32 = 64;
-const ATLAS_MAX_SIZE: u32 = 2048;
-const GLYPH_PADDING: u32 = 2;
-
-#[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct TextVertex {
-    position: [f32; 2],
-    tex_coords: [f32; 2],
-    color: [f32; 4],
-}
-
-/// Description of a single text block to render.
-pub struct TextEntry<'a> {
-    pub text: &'a str,
-    pub font_size: f32,
-    pub screen_x: f32,
-    pub screen_y_baseline: f32,
-    pub color: [f32; 4],
-}
-
-#[derive(Clone, PartialEq, Eq, Hash)]
-struct AtlasKey {
-    text: String,
-    font_size_bits: u32,
-}
-
-impl AtlasKey {
-    fn new(text: &str, font_size: f32) -> Self {
-        Self {
-            text: text.to_owned(),
-            font_size_bits: font_size.to_bits(),
-        }
-    }
-}
 
 struct CachedAtlas {
     bind_group: wgpu::BindGroup,
@@ -54,17 +17,8 @@ struct CachedAtlas {
     texture: wgpu::Texture,
     atlas_width: u32,
     atlas_height: u32,
-    char_info: Vec<GlyphInfo>,
+    glyphs: Vec<atlas::GlyphInfo>,
     frame: u64,
-}
-
-struct GlyphInfo {
-    atlas_x: u32,
-    width: u32,
-    height: u32,
-    xmin: i32,
-    ymin: i32,
-    advance_width: f32,
 }
 
 struct PendingDrawCall {
@@ -96,7 +50,7 @@ impl TextRenderer {
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Text Shader"),
-            source: wgpu::ShaderSource::Wgsl(include_str!("../assets/text.wgsl").into()),
+            source: wgpu::ShaderSource::Wgsl(include_str!("../../assets/text.wgsl").into()),
         });
 
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -239,109 +193,10 @@ impl TextRenderer {
             .expect("invalid font data")
     }
 
-    fn rasterize_atlas(
-        font: &fontdue::Font,
-        text: &str,
-        font_size: f32,
-    ) -> (Vec<u8>, u32, u32, Vec<GlyphInfo>) {
-        let mut pen_x = 0u32;
-        let mut max_height = 0u32;
-
-        for c in text.chars() {
-            let (metrics, _) = font.rasterize(c, font_size);
-            pen_x += metrics.width as u32 + GLYPH_PADDING;
-            max_height = max_height.max(metrics.height as u32);
-        }
-
-        let atlas_width = pen_x.next_power_of_two().clamp(ATLAS_MIN_SIZE, ATLAS_MAX_SIZE);
-        let atlas_height = max_height.next_power_of_two().clamp(ATLAS_MIN_SIZE, ATLAS_MAX_SIZE);
-
-        let mut atlas_data = vec![0u8; (atlas_width * atlas_height) as usize];
-        let mut char_info = Vec::with_capacity(text.len());
-        pen_x = 0;
-
-        for c in text.chars() {
-            let (metrics, bitmap) = font.rasterize(c, font_size);
-            let w = metrics.width as u32;
-            let h = metrics.height as u32;
-
-            for y in 0..h {
-                for x in 0..w {
-                    let atlas_idx = ((y * atlas_width) + pen_x + x) as usize;
-                    let bitmap_idx = (y * w + x) as usize;
-                    if atlas_idx < atlas_data.len() && bitmap_idx < bitmap.len() {
-                        atlas_data[atlas_idx] = bitmap[bitmap_idx];
-                    }
-                }
-            }
-
-            char_info.push(GlyphInfo {
-                atlas_x: pen_x,
-                width: w,
-                height: h,
-                xmin: metrics.xmin,
-                ymin: metrics.ymin,
-                advance_width: metrics.advance_width,
-            });
-            pen_x += w + GLYPH_PADDING;
-        }
-
-        (atlas_data, atlas_width, atlas_height, char_info)
-    }
-
-    fn build_vertices(
-        cached: &CachedAtlas,
-        screen_x: f32,
-        screen_y_baseline: f32,
-        color: [f32; 4],
-        screen_to_ndc: &impl Fn(f32, f32) -> [f32; 2],
-    ) -> Vec<TextVertex> {
-        let mut vertices = Vec::new();
-        let mut cursor_x = screen_x;
-
-        for gi in &cached.char_info {
-            let w_f = gi.width as f32;
-            let h_f = gi.height as f32;
-
-            let left = cursor_x + gi.xmin as f32;
-            let right = left + w_f;
-            let top = screen_y_baseline - (gi.ymin as f32 + h_f);
-            let bottom = screen_y_baseline - gi.ymin as f32;
-
-            let [ndc_left, ndc_top] = screen_to_ndc(left, top);
-            let [ndc_right, ndc_bottom] = screen_to_ndc(right, bottom);
-
-            let uv_left = gi.atlas_x as f32 / cached.atlas_width as f32;
-            let uv_right = (gi.atlas_x + gi.width) as f32 / cached.atlas_width as f32;
-            let uv_top = 0.0;
-            let uv_bottom = h_f / cached.atlas_height as f32;
-
-            let v = |px, py, u, v| TextVertex {
-                position: [px, py],
-                tex_coords: [u, v],
-                color,
-            };
-            vertices.extend_from_slice(&[
-                v(ndc_left, ndc_bottom, uv_left, uv_bottom),
-                v(ndc_right, ndc_bottom, uv_right, uv_bottom),
-                v(ndc_left, ndc_top, uv_left, uv_top),
-                v(ndc_right, ndc_bottom, uv_right, uv_bottom),
-                v(ndc_right, ndc_top, uv_right, uv_top),
-                v(ndc_left, ndc_top, uv_left, uv_top),
-            ]);
-
-            cursor_x += gi.advance_width;
-        }
-
-        vertices
-    }
-
     fn upload_atlas(
         &self,
         ctx: &GraphicsContext,
-        atlas_data: &[u8],
-        width: u32,
-        height: u32,
+        metrics: &AtlasMetrics,
     ) -> (wgpu::Texture, wgpu::BindGroup) {
         let device = ctx.device();
         let queue = ctx.queue();
@@ -349,8 +204,8 @@ impl TextRenderer {
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("Text Atlas"),
             size: wgpu::Extent3d {
-                width,
-                height,
+                width: metrics.width,
+                height: metrics.height,
                 depth_or_array_layers: 1,
             },
             mip_level_count: 1,
@@ -363,15 +218,15 @@ impl TextRenderer {
 
         queue.write_texture(
             texture.as_image_copy(),
-            atlas_data,
+            &metrics.data,
             wgpu::ImageDataLayout {
                 offset: 0,
-                bytes_per_row: Some(width),
-                rows_per_image: Some(height),
+                bytes_per_row: Some(metrics.width),
+                rows_per_image: Some(metrics.height),
             },
             wgpu::Extent3d {
-                width,
-                height,
+                width: metrics.width,
+                height: metrics.height,
                 depth_or_array_layers: 1,
             },
         );
@@ -420,26 +275,30 @@ impl TextRenderer {
 
             let needs_insert = !self.cache.contains_key(&key);
             if needs_insert {
-                let (atlas_data, atlas_w, atlas_h, char_info) =
-                    Self::rasterize_atlas(&self.font, entry.text, entry.font_size);
-                let (texture, bind_group) =
-                    self.upload_atlas(ctx, &atlas_data, atlas_w, atlas_h);
-                self.cache.insert(key.clone(), CachedAtlas {
-                    texture,
-                    bind_group,
-                    atlas_width: atlas_w,
-                    atlas_height: atlas_h,
-                    char_info,
-                    frame: 0,
-                });
+                let metrics =
+                    atlas::rasterize_atlas(&self.font, entry.text, entry.font_size);
+                let (texture, bind_group) = self.upload_atlas(ctx, &metrics);
+                self.cache.insert(
+                    key.clone(),
+                    CachedAtlas {
+                        texture,
+                        bind_group,
+                        atlas_width: metrics.width,
+                        atlas_height: metrics.height,
+                        glyphs: metrics.glyphs,
+                        frame: 0,
+                    },
+                );
             }
 
             let cached = self.cache.get_mut(&key).expect("just inserted");
             cached.frame = current_frame;
 
             let offset = all_vertices.len() as u32;
-            let vertices = Self::build_vertices(
-                cached,
+            let vertices = atlas::build_vertices(
+                &cached.glyphs,
+                cached.atlas_width,
+                cached.atlas_height,
                 entry.screen_x,
                 entry.screen_y_baseline,
                 entry.color,
@@ -489,23 +348,5 @@ impl TextRenderer {
             pass.set_bind_group(0, &cached.bind_group, &[]);
             pass.draw(call.vertex_offset..call.vertex_offset + call.vertex_count, 0..1);
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn text_vertex_size_matches_layout() {
-        let expected = std::mem::size_of::<[f32; 2]>()
-            + std::mem::size_of::<[f32; 2]>()
-            + std::mem::size_of::<[f32; 4]>();
-        assert_eq!(std::mem::size_of::<TextVertex>(), expected);
-    }
-
-    #[test]
-    fn text_vertex_is_32_bytes() {
-        assert_eq!(std::mem::size_of::<TextVertex>(), 32);
     }
 }
