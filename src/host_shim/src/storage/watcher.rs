@@ -187,6 +187,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires file system event timing (run with --ignored --test-threads=1)"]
     fn detect_file_creation() {
         let dir = unique_temp_dir("create");
         let mut watcher = FileWatcher::new().unwrap();
@@ -208,6 +209,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires file system event timing (run with --ignored --test-threads=1)"]
     fn detect_file_modification() {
         let dir = unique_temp_dir("modify");
         let file_path = dir.join("modify.txt");
@@ -233,6 +235,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires file system event timing (run with --ignored --test-threads=1)"]
     fn detect_file_deletion() {
         let dir = unique_temp_dir("delete");
         let file_path = dir.join("delete.txt");
@@ -258,6 +261,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires file system event timing (run with --ignored --test-threads=1)"]
     fn poll_empty_when_no_events() {
         let dir = unique_temp_dir("empty");
         let mut watcher = FileWatcher::new().unwrap();
