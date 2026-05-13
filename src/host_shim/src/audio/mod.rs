@@ -213,6 +213,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires audio devices (run with --ignored --test-threads=1)"]
     fn cpal_backend_default_output() {
         let backend = CpalBackend::new().unwrap();
         let result = backend.default_output();
@@ -222,6 +223,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires audio devices (run with --ignored --test-threads=1)"]
     fn cpal_backend_default_input() {
         let backend = CpalBackend::new().unwrap();
         let result = backend.default_input();
@@ -231,6 +233,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires audio devices (run with --ignored --test-threads=1)"]
     fn cpal_backend_list_devices() {
         let backend = CpalBackend::new().unwrap();
         let devices = backend.list_devices().unwrap();
