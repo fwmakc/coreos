@@ -1,6 +1,6 @@
-# AGENTS.md — CORE OS Project Configuration
+# AGENTS.md — Workspace Project Configuration
 
-## Project: CORE OS
+## Project: Workspace
 
 Cross-platform overlay runtime providing a unified, secure workspace across Windows, macOS, Linux, Android, and iOS. Leverages host OS drivers while delivering a consistent user experience, offline-first P2P sync, and local AI inference.
 

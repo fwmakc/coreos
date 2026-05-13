@@ -5,7 +5,7 @@
 use w_host_shim::VERSION;
 
 fn main() {
-    println!("CORE OS Host Shim v{VERSION}");
+    println!("Workspace Host Shim v{VERSION}");
     println!("Status: foundation in progress — see plan/phase-01-host-shim-windows.md");
     // TODO: init winit event loop (phase 1)
 }

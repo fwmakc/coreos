@@ -1,4 +1,4 @@
-//! CORE OS Test Runner
+//! Workspace Test Runner
 //!
 //! Maps test-case IDs (TC-XX-YYY) from markdown specifications to actual
 //! `cargo test` results and produces a JSON coverage report.
@@ -61,7 +61,7 @@ fn main() {
     let json_out = arg_value(&args, "--json");
     let specs_dir = arg_value(&args, "--specs").unwrap_or_else(|| "tests".into());
 
-    println!("CORE OS Test Runner v0.1.0");
+    println!("Workspace Test Runner v0.1.0");
     println!("Workspace: {workspace}");
     println!("Specs dir: {specs_dir}");
 

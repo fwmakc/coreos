@@ -1,7 +1,7 @@
-# Этап 30 — Security Core
+﻿# Этап 30 — Security Core
 
 ## Цель
-Встроить в систему полноценную безопасность: RBAC, аудит (13 категорий), Key Manager (Ed25519, TPM/Secure Enclave), Session Management (TTL, auto-lock, remote wipe), и Secure Transaction API. После этого этапа CORE OS защищена на всех уровнях: аутентификация, авторизация, шифрование, аудит.
+Встроить в систему полноценную безопасность: RBAC, аудит (13 категорий), Key Manager (Ed25519, TPM/Secure Enclave), Session Management (TTL, auto-lock, remote wipe), и Secure Transaction API. После этого этапа Workspace защищена на всех уровнях: аутентификация, авторизация, шифрование, аудит.
 
 ## Язык и стек
 - **Язык:** TypeScript (логика), Rust (криптография через FFI если needed)

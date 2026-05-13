@@ -1,4 +1,4 @@
-# Тесты: Этап 04 — Host Shim: Android
+﻿# Тесты: Этап 04 — Host Shim: Android
 
 > NativeActivity, lifecycle, soft keyboard, IME, touch, sensors, USB OTG, FCM. Все тесты на реальном устройстве или эмуляторе с GPU.
 
@@ -32,7 +32,7 @@
 ### TC-04-004: Lifecycle — low memory
 **Тип:** E2E | **Платформа:** Android | **Данные:** Реальные | **Приоритет:** P1
 **Шаги:**
-1. `adb shell am send-trim-memory com.coreos.TRIM_MEMORY_COMPLETE`.
+1. `adb shell am send-trim-memory com.Workspace.TRIM_MEMORY_COMPLETE`.
 **Ожидаемый результат:**
 - `onTrimMemory`. Resources freed gracefully.
 **Автоматизация:** автоматический.

@@ -1,7 +1,7 @@
-# Этап 3 — Host Shim: Linux
+﻿# Этап 3 — Host Shim: Linux
 
 ## Цель
-Портировать Host Shim на Linux. После завершения этого этапа CORE OS компилируется и запускается на Linux (X11 и Wayland) с идентичным поведением окна и ввода.
+Портировать Host Shim на Linux. После завершения этого этапа Workspace компилируется и запускается на Linux (X11 и Wayland) с идентичным поведением окна и ввода.
 
 ## Язык и стек
 - **Язык:** Rust
@@ -22,7 +22,7 @@
 - `winit` автоматически выбирает бэкенд: Wayland (приоритет) → X11 (fallback).
 - Поддержка оконного режима и полноэкранного (borderless).
 - DPI scaling через `wl_output::scale` (Wayland) или `Xft.dpi` (X11).
-- Title bar: CORE OS рендерит собственный chrome. На Wayland используется `xdg-decoration` для запроса CSD (client-side decorations).
+- Title bar: Workspace рендерит собственный chrome. На Wayland используется `xdg-decoration` для запроса CSD (client-side decorations).
 
 ### 3.2 Ввод с клавиатуры
 - KeyDown / KeyUp / KeyRepeat через `winit`.
@@ -47,7 +47,7 @@
 - Платформенно-специфичный код в `src/platform/linux/` и `src/platform/android/`.
 
 ### 3.6 Логирование
-- Логи пишутся в `~/.local/share/CoreOS/logs/`.
+- Логи пишутся в `~/.local/share/Workspace/logs/`.
 
 ## Ключевые функции
 
@@ -69,7 +69,7 @@
 - [ ] Все события клавиатуры и мыши попадают в лог.
 - [ ] Panic Gesture работает.
 - [ ] Android baseline: компилируется, окно открывается, тач работает.
-- [ ] Логи пишутся в `~/.local/share/CoreOS/logs/`.
+- [ ] Логи пишутся в `~/.local/share/Workspace/logs/`.
 
 ## Ссылки
 - [layer-1-user-experience.md](../layers/layer-1-user-experience.md) — Окна и приложения

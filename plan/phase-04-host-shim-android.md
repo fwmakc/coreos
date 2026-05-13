@@ -1,7 +1,7 @@
-# Этап 4 — Host Shim: Android
+﻿# Этап 4 — Host Shim: Android
 
 ## Цель
-Портировать Host Shim на Android. После завершения этого этапа CORE OS компилируется и запускается на Android как Native Activity с полноценным вводом (тач, клавиатура), аудио, хранилищем и сетью.
+Портировать Host Shim на Android. После завершения этого этапа Workspace компилируется и запускается на Android как Native Activity с полноценным вводом (тач, клавиатура), аудио, хранилищем и сетью.
 
 ## Язык и стек
 - **Язык:** Rust
@@ -22,7 +22,7 @@
 - Реализация `HostBackend` для Android через `winit` с бэкендом `android_native_activity`.
 - **Surface:** `ANativeWindow` из NativeActivity, интеграция с `wgpu` surface через `raw-window-handle` (Android display handle).
 - **Ориентация:** поддержка portrait, landscape, auto-rotate. Уведомление приложения об изменении ориентации.
-- **Multi-window:** Android split-screen и freeform window mode. CORE OS окно масштабируется корректно.
+- **Multi-window:** Android split-screen и freeform window mode. Workspace окно масштабируется корректно.
 - **Insets:** обработка system bars (status bar, navigation bar, keyboard inset). Display Server получает safe area для рендеринга.
 
 ### 4.2 Ввод с тачскрина
@@ -39,7 +39,7 @@
 ### 4.4 Системные кнопки
 - **Назад (Back):** обрабатывается как `Escape` или специальное событие `SystemBack`. Приложение решает — обработать или передать системе.
 - **Домой (Home):** **Panic Gesture** — выход из CORE в хост-ОС (Android launcher) [См. layer-4 §5.3].
-- **Недавние (Recents):** отображается как стандартный Android recent apps. CORE OS в recent apps показывает snapshot текущего экрана.
+- **Недавние (Recents):** отображается как стандартный Android recent apps. Workspace в recent apps показывает snapshot текущего экрана.
 - **Кнопка питания:** блокировка экрана Android = блокировка экрана CORE (если CORE активно).
 
 ### 4.5 Аудио (Oboe)
@@ -48,12 +48,12 @@
 - **Телефония:** при входящем звонке — pause все аудио-приложения, показать incoming call overlay.
 
 ### 4.6 Хранилище
-- **Scoped Storage:** Android 10+ scoped storage model. CORE OS запрашивает `MANAGE_EXTERNAL_STORAGE` или работает в рамках scoped storage.
+- **Scoped Storage:** Android 10+ scoped storage model. Workspace запрашивает `MANAGE_EXTERNAL_STORAGE` или работает в рамках scoped storage.
 - **MediaStore:** интеграция с системной галереей и музыкой (опционально).
 - **SharedPreferences:** для небольших настроек (fallback если нет доступа к файлам).
 
 ### 4.7 Сеть
-- **VPN:** Android требует `VpnService` для создания WireGuard туннеля. CORE OS регистрирует VPN service.
+- **VPN:** Android требует `VpnService` для создания WireGuard туннеля. Workspace регистрирует VPN service.
 - **Doze mode:** в doze mode (экран выключен, устройство не заряжается) — P2P sync приостанавливается, сохраняются только push-уведомления.
 - **Data Saver:** если включен Data Saver — P2P sync только по WiFi.
 

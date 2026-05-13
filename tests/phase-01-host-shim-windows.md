@@ -1,4 +1,4 @@
-# Тесты: Этап 01 — Host Shim: Windows
+﻿# Тесты: Этап 01 — Host Shim: Windows
 
 > Оконная подсистема, ввод, жизненный цикл, платформенные абстракции Windows. Все тесты на реальном железе или VM с GPU passthrough.
 
@@ -15,7 +15,7 @@
 4. Вызвать `GetWindowRect`.
 **Ожидаемый результат:**
 - Handle ≠ null. Ширина 800 ± 2 px, высота 600 ± 2 px (допуск на DPI scaling).
-- `IsWindowVisible(handle)` = true. Заголовок содержит "CORE OS".
+- `IsWindowVisible(handle)` = true. Заголовок содержит "Workspace".
 **Автоматизация:** автоматический (WinAPI через `windows-sys`).
 
 ### TC-01-002: Resize окна 800→1200
@@ -190,9 +190,9 @@
 ### TC-01-020: Логирование — JSON структура
 **Тип:** Integration | **Платформа:** Windows | **Данные:** Реальные | **Приоритет:** P0
 **Шаги:**
-1. Запустить с `CORE_LOG=debug`.
+1. Запустить с `WORKSPACE_LOG=debug`.
 2. Подождать 5 сек.
-3. Проверить `%LOCALAPPDATA%\CoreOS\logs\host-shim-*.log`.
+3. Проверить `%LOCALAPPDATA%\Workspace\logs\host-shim-*.log`.
 **Ожидаемый результат:**
 - Файл существует, размер > 0. JSON-структура: `{timestamp, level, module, message, …}`.
 **Автоматизация:** автоматический.

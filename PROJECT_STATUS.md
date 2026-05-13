@@ -1,4 +1,4 @@
-# PROJECT_STATUS.md — CORE OS Progress Report
+﻿# PROJECT_STATUS.md — Workspace Progress Report
 
 > Last updated: 2026-05-12  
 > Status: **Pre-Alpha / Phase 0: Playable Demo**
@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-CORE OS is a cross-platform overlay runtime in the **early development** stage. The architecture is finalized, the implementation roadmap is defined (37 phases), and the first code modules are being laid out. No production release exists yet.
+Workspace is a cross-platform overlay runtime in the **early development** stage. The architecture is finalized, the implementation roadmap is defined (37 phases), and the first code modules are being laid out. No production release exists yet.
 
 ---
 
@@ -56,7 +56,7 @@ Full plan: [`plan/roadmap.md`](plan/roadmap.md)
 
 ## How to Evaluate the Project
 
-If you are assessing CORE OS for corporate or investment use, look at:
+If you are assessing Workspace for corporate or investment use, look at:
 
 1. **Architecture depth** — `layers/layer-8-technical-decomposition.md` (145 KB of subsystem specs)
 2. **Security model** — `layers/layer-7-security.md` (132 KB, 13 audit categories)
@@ -78,8 +78,8 @@ If you are assessing CORE OS for corporate or investment use, look at:
 
 ## Contact
 
-- General: team@coreos.dev
-- Security: security@coreos.dev
+- General: team@Workspace.dev
+- Security: security@Workspace.dev
 - Issues: [GitHub Issues](../../issues)
 
 ---

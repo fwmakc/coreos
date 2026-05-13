@@ -8,14 +8,14 @@ use tracing_subscriber::prelude::*;
 /// Initialize tracing with JSON formatting and file output.
 ///
 /// Environment variables:
-/// - `CORE_LOG` — log level filter (default: `info`)
+/// - `WORKSPACE_LOG` — log level filter (default: `info`)
 pub fn init_logging() -> Result<(), crate::backend::HostError> {
     let log_dir = log_directory()?;
     fs::create_dir_all(&log_dir).map_err(|e| {
         crate::backend::HostError::WindowCreationFailed(format!("log dir creation failed: {e}"))
     })?;
 
-    let log_file = log_dir.join("coreos.log");
+    let log_file = log_dir.join("workspace.log");
     let file = fs::OpenOptions::new()
         .create(true)
         .append(true)
@@ -24,7 +24,7 @@ pub fn init_logging() -> Result<(), crate::backend::HostError> {
             crate::backend::HostError::WindowCreationFailed(format!("log file open failed: {e}"))
         })?;
 
-    let env_filter = tracing_subscriber::EnvFilter::try_from_env("CORE_LOG")
+    let env_filter = tracing_subscriber::EnvFilter::try_from_env("WORKSPACE_LOG")
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
 
     let fmt_layer = tracing_subscriber::fmt::layer()
@@ -48,7 +48,7 @@ fn log_directory() -> Result<PathBuf, crate::backend::HostError> {
         let local_app_data = std::env::var("LOCALAPPDATA").map_err(|_| {
             crate::backend::HostError::WindowCreationFailed("LOCALAPPDATA not set".into())
         })?;
-        Ok(PathBuf::from(local_app_data).join("CoreOS").join("logs"))
+        Ok(PathBuf::from(local_app_data).join("Workspace").join("logs"))
     }
 
     #[cfg(target_os = "linux")]
@@ -58,7 +58,7 @@ fn log_directory() -> Result<PathBuf, crate::backend::HostError> {
         Ok(PathBuf::from(home)
             .join(".local")
             .join("share")
-            .join("CoreOS")
+            .join("Workspace")
             .join("logs"))
     }
 
@@ -69,7 +69,7 @@ fn log_directory() -> Result<PathBuf, crate::backend::HostError> {
         Ok(PathBuf::from(home)
             .join("Library")
             .join("Application Support")
-            .join("CoreOS")
+            .join("Workspace")
             .join("logs"))
     }
 
@@ -90,7 +90,7 @@ mod tests {
         let path = log_directory();
         assert!(path.is_ok(), "log_directory should not panic");
         let path = path.unwrap();
-        assert!(path.to_string_lossy().contains("CoreOS"));
+        assert!(path.to_string_lossy().contains("Workspace"));
         assert!(path.to_string_lossy().contains("logs"));
     }
 }

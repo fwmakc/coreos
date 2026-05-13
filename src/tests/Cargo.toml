@@ -1,6 +1,6 @@
 [package]
 name = "integration_tests"
-description = "Cross-crate integration test suite for CORE OS"
+description = "Cross-crate integration test suite for Workspace"
 version.workspace = true
 authors.workspace = true
 license.workspace = true

@@ -1,6 +1,6 @@
-# Contributing to CORE OS
+﻿# Contributing to Workspace
 
-Thank you for your interest in CORE OS! This document outlines how to participate in the project.
+Thank you for your interest in Workspace! This document outlines how to participate in the project.
 
 ## Code of Conduct
 
@@ -58,4 +58,4 @@ bun test
 
 ## Questions?
 
-Open a Discussion on GitHub or contact the team at team@coreos.dev.
+Open a Discussion on GitHub or contact the team at team@Workspace.dev.

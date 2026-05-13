@@ -1,4 +1,4 @@
-# Тесты: Этап 02 — Host Shim: macOS
+﻿# Тесты: Этап 02 — Host Shim: macOS
 
 > Оконная подсистема, ввод, жизненный цикл, платформенные абстракции macOS. Все тесты на реальном Mac (Intel или Apple Silicon).
 
@@ -130,7 +130,7 @@
 ### TC-02-015: Menu bar integration
 **Тип:** E2E | **Платформа:** macOS | **Данные:** Реальные | **Приоритет:** P1
 **Шаги:**
-1. Проверить: Menu bar содержит "CORE OS".
+1. Проверить: Menu bar содержит "Workspace".
 2. Проверить: пункты меню (About, Preferences, Quit).
 **Ожидаемый результат:**
 - Menu bar корректен. Quit → `PanicExit`.

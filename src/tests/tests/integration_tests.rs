@@ -22,7 +22,7 @@ use w_micro_kernel::security::{Capability, Rights};
 #[test]
 fn tc_01_001_window_surface_creation_800x600() {
     let cfg = WindowConfig {
-        title: "CORE OS".into(),
+        title: "Workspace".into(),
         width: 800,
         height: 600,
         high_dpi: true,

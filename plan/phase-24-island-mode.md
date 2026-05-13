@@ -1,4 +1,4 @@
-# Этап 24 — Island Mode
+﻿# Этап 24 — Island Mode
 
 ## Цель
 Создать Island Mode — sandbox для веб-контента (HTML/CSS/JS) и legacy-приложений на базе встроенного Chromium (CEF) или аналога. После этого этапа пользователь может открывать веб-сайты и веб-приложения в изолированном окне с ограниченным доступом к системе.
@@ -21,7 +21,7 @@
 ## Требования
 
 ### 21.1 WebView Embedding
-- **Архитектура:** Island Mode — это не отдельное окно браузера, а текстура внутри окна CORE OS. WebView рендерит свое содержимое в off-screen surface, который передаётся Display Server (этап 9) как `WindowLayer` texture.
+- **Архитектура:** Island Mode — это не отдельное окно браузера, а текстура внутри окна Workspace. WebView рендерит свое содержимое в off-screen surface, который передаётся Display Server (этап 9) как `WindowLayer` texture.
 - **Интеграция с Display Server:**
   - WebView предоставляет `SharedTexture` (DMA-BUF на Linux, IOSurface на macOS, DXGI shared handle на Windows).
   - Display Server композитит эту текстуру как обычное окно приложения (с chrome, shadows, blur).
@@ -43,11 +43,11 @@
   - `destroy(island_id)`
 
 ### 21.3 Sandbox
-- **Process isolation:** WebView запускается в отдельном процессе (renderer process) от основного процесса CORE OS.
+- **Process isolation:** WebView запускается в отдельном процессе (renderer process) от основного процесса Workspace.
 - **Network sandbox:** WebView имеет доступ только к `http/https`. Доступ к `file://` запрещён (за исключением sandboxed app bundle).
 - **Capability bridge:** WebView не имеет прямого доступа к `@core/*` API. Взаимодействие через `postMessage` bridge:
   - WebView: `window.parent.postMessage({ type: 'core:fs:read', path: '...' }, '*')`
-  - CORE OS: проверка capability → выполнение → `postMessage` обратно с результатом.
+  - Workspace: проверка capability → выполнение → `postMessage` обратно с результатом.
 - **Cookie isolation:** cookies WebView не пересекаются с системой и между разными Island Mode окнами (если не настроено иначе).
 
 ### 21.4 core.json Integration (Level 1–2)

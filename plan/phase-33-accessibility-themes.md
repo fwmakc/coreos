@@ -1,7 +1,7 @@
-# Этап 33 — Accessibility & Themes
+﻿# Этап 33 — Accessibility & Themes
 
 ## Цель
-Создать систему доступности (Accessibility) и тем оформления (Themes). После этого этапа CORE OS доступна пользователям с ограниченными возможностями и поддерживает кастомизацию визуального стиля.
+Создать систему доступности (Accessibility) и тем оформления (Themes). После этого этапа Workspace доступна пользователям с ограниченными возможностями и поддерживает кастомизацию визуального стиля.
 
 ## Язык и стек
 - **Язык:** TypeScript (theme engine, settings), Rust (post-processing shaders, screen reader API)

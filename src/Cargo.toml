@@ -12,11 +12,11 @@ resolver = "2"
 
 [workspace.package]
 version = "0.1.0-alpha.1"
-authors = ["CORE OS Team <team@coreos.dev>"]
+authors = ["Workspace Team"]
 license = "Apache-2.0"
 edition = "2021"
 repository = "https://github.com/fwmakc/workspace"
-homepage = "https://coreos.dev"
+homepage = "https://github.com/fwmakc/workspace"
 rust-version = "1.78"
 
 [workspace.dependencies]

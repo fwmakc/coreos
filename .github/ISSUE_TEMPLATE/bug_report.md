@@ -1,6 +1,6 @@
----
+﻿---
 name: Bug report
-about: Create a report to help us improve CORE OS
+about: Create a report to help us improve Workspace
 title: '[BUG] '
 labels: bug
 assignees: ''
@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
  - OS: [e.g. Windows 11, macOS 14, Ubuntu 24.04]
- - CORE OS Version: [e.g. 0.1.0-alpha.1]
+ - Workspace Version: [e.g. 0.1.0-alpha.1]
  - Host OS Version: [e.g. Windows 11 23H2]
 
 **Additional context**

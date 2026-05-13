@@ -1,7 +1,7 @@
-# Этап 31 — Admin UI (Backoffice & Hardcore)
+﻿# Этап 31 — Admin UI (Backoffice & Hardcore)
 
 ## Цель
-Создать интерфейсы администрирования CORE OS: графический (Core.Backoffice) и текстовый (Core.Hardcore TUI/CLI). После этого этапа Owner и администраторы могут управлять пользователями, ролями, аудитом, бэкапом и AI-настройками.
+Создать интерфейсы администрирования Workspace: графический (Core.Backoffice) и текстовый (Core.Hardcore TUI/CLI). После этого этапа Owner и администраторы могут управлять пользователями, ролями, аудитом, бэкапом и AI-настройками.
 
 ## Язык и стек
 - **Язык:** TypeScript (Backoffice GUI, Hardcore CLI), Rust (Hardcore TUI)

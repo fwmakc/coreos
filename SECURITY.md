@@ -1,4 +1,4 @@
-# Security Policy
+﻿# Security Policy
 
 ## Supported Versions
 
@@ -9,11 +9,11 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in CORE OS, please report it responsibly.
+If you discover a security vulnerability in Workspace, please report it responsibly.
 
 **Please do NOT open a public issue for security bugs.**
 
-Instead, send an email to: **security@coreos.dev**
+Instead, send an email to: **security@Workspace.dev**
 
 Include the following details:
 - Description of the vulnerability

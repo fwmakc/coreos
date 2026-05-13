@@ -18,7 +18,7 @@ pub struct WindowConfig {
 impl Default for WindowConfig {
     fn default() -> Self {
         Self {
-            title: "CORE OS".into(),
+            title: "Workspace".into(),
             width: 1280,
             height: 720,
             high_dpi: true,
@@ -56,7 +56,7 @@ mod tests {
     #[test]
     fn window_config_default() {
         let cfg = WindowConfig::default();
-        assert_eq!(cfg.title, "CORE OS");
+        assert_eq!(cfg.title, "Workspace");
         assert_eq!(cfg.width, 1280);
         assert_eq!(cfg.height, 720);
         assert!(cfg.high_dpi);
@@ -83,7 +83,7 @@ mod tests {
     fn window_creation() {
         let cfg = WindowConfig::default();
         let win = Window::new(cfg.clone());
-        assert_eq!(win.config().title, "CORE OS");
+        assert_eq!(win.config().title, "Workspace");
         assert_eq!(win.config().width, 1280);
     }
 

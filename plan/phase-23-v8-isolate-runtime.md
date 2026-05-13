@@ -1,7 +1,7 @@
-# Этап 23 — V8 Isolate Runtime
+﻿# Этап 23 — V8 Isolate Runtime
 
 ## Цель
-Создать runtime для нативных приложений CORE OS на базе V8 Isolates (через Bun). После этого этапа приложения level 3–5 могут запускаться в sandbox, иметь доступ к `@core/*` API, и взаимодействовать с системой через capabilities.
+Создать runtime для нативных приложений Workspace на базе V8 Isolates (через Bun). После этого этапа приложения level 3–5 могут запускаться в sandbox, иметь доступ к `@core/*` API, и взаимодействовать с системой через capabilities.
 
 ## Язык и стек
 - **Язык:** TypeScript (runtime), приложения пишутся на TypeScript/JavaScript
@@ -36,7 +36,7 @@
   - `fetch` — только если выдано `network:http`. Домены ограничены whitelist.
   - `console.log` — перенаправлен в системный лог (с тегом app-id).
   - `setTimeout`/`setInterval` — ограничены 100 активными таймерами.
-- **Filesystem sandbox:** `core.fs.read(path)` — path ограничен `CORE_ROOT/apps/<app-id>/` + explicitly granted папками.
+- **Filesystem sandbox:** `core.fs.read(path)` — path ограничен `WORKSPACE_ROOT/apps/<app-id>/` + explicitly granted папками.
 - **Graphics sandbox:** приложение не имеет прямого доступа к GPU. Оно отправляет `RenderNode` дерево в Display Server (этап 9), который рендерит от имени приложения.
 
 ### 20.3 @core/* API
@@ -49,7 +49,7 @@
 - **@core/intent:** `emit(intent)` — отправка Intent в систему (например, "открой файл").
 - **@core/contacts:** `list()`, `search()` — адресная книга (с `contacts:read`).
 - **@core/messenger:** `send(peer, message)` — отправка сообщения.
-- **@core/mock:** npm-пакет для тестирования приложений вне CORE OS (dev dependency).
+- **@core/mock:** npm-пакет для тестирования приложений вне Workspace (dev dependency).
 
 ### 20.4 Permissions UI
 - При установке (этап 19) или при первом использовании capability приложение запрашивает право.

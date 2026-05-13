@@ -1,7 +1,7 @@
-# Этап 2 — Host Shim: macOS
+﻿# Этап 2 — Host Shim: macOS
 
 ## Цель
-Портировать Host Shim на macOS. После завершения этого этапа CORE OS компилируется и запускается на macOS с идентичным поведением окна и ввода.
+Портировать Host Shim на macOS. После завершения этого этапа Workspace компилируется и запускается на macOS с идентичным поведением окна и ввода.
 
 ## Язык и стек
 - **Язык:** Rust
@@ -20,7 +20,7 @@
 - Реализация `HostBackend` для macOS через `winit`.
 - Поддержка оконного режима и полноэкранного (borderless fullscreen + native macOS Full Screen через зелёную кнопку).
 - DPI scaling через `NSScreen::backingScaleFactor`.
-- Title bar styling: CORE OS рендерит собственный chrome, поэтому нативный title bar скрывается или минимизируется.
+- Title bar styling: Workspace рендерит собственный chrome, поэтому нативный title bar скрывается или минимизируется.
 - **Важно:** macOS Full Screen (зелёная кнопка) должен переключать в borderless fullscreen режим CORE, а не создавать отдельное Space macOS.
 
 ### 2.2 Ввод с клавиатуры
@@ -40,7 +40,7 @@
 - Платформенно-специфичный код инкапсулирован в `src/platform/macos/`.
 
 ### 2.5 Логирование
-- Логи пишутся в `~/Library/Application Support/CoreOS/logs/`.
+- Логи пишутся в `~/Library/Application Support/Workspace/logs/`.
 
 ## Ключевые функции
 
@@ -62,7 +62,7 @@
 - [ ] Cmd+Tab в fullscreen открывает Command Bar (проверяется через лог).
 - [ ] Panic Gesture работает.
 - [ ] Retina scaling корректен.
-- [ ] Логи пишутся в `~/Library/Application Support/CoreOS/logs/`.
+- [ ] Логи пишутся в `~/Library/Application Support/Workspace/logs/`.
 
 ## Ссылки
 - [layer-1-user-experience.md](../layers/layer-1-user-experience.md) — Окна и приложения

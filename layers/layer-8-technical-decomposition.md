@@ -9,7 +9,7 @@
 ## Карта подсистем
 
 ```
-CORE OS Subsystems:
+Workspace Subsystems:
 
 Command Bar      Project Mgr      Window Mgr       App Runtime
   Input Router     Lifecycle        Z-index          V8 Isolates
@@ -259,14 +259,14 @@ P2P Mesh (Level 2) -> Host Shim Network Bridge
 
 ### OverlayFS / Immutable Core
 
-**Что:** Системные файлы CORE OS неизменяемы. Обновления применяются атомарно через overlay: новая версия монтируется поверх, старая остаётся для rollback.
+**Что:** Системные файлы Workspace неизменяемы. Обновления применяются атомарно через overlay: новая версия монтируется поверх, старая остаётся для rollback.
 
 **Как:**
 
 ```
 Core Base / Raspberry Pi (Linux):
   |
-  +-- Lowerdir (read-only): системные файлы CORE OS (/usr/core/, /lib/core/)
+  +-- Lowerdir (read-only): системные файлы Workspace (/usr/core/, /lib/core/)
   +-- Upperdir (read-write): пользовательские данные, кэш, логи
   +-- Workdir: рабочая директория OverlayFS
   +-- Merged: то, что видит CORE runtime
@@ -1332,7 +1332,7 @@ Error Reporting Engine (Level 1):
 
 ### 4.9 core-dev (Developer CLI)
 
-**Что:** CLI-инструмент разработчика приложений для CORE OS.
+**Что:** CLI-инструмент разработчика приложений для Workspace.
 
 **Команды:**
 - `core-dev install` — установка зависимостей `@core/*`
@@ -1348,12 +1348,12 @@ Error Reporting Engine (Level 1):
 
 ### 4.10 @core/mock
 
-**Что:** npm-пакет для тестирования приложений уровней 4–5 вне CORE OS.
+**Что:** npm-пакет для тестирования приложений уровней 4–5 вне Workspace.
 
 **Как:**
 - In-memory реализации `@core/*` API (`@core/db`, `@core/fs`, `@core/network` и др.)
 - Позволяет разрабатывать и тестировать приложение в обычном браузере/Node.js
-- Не требует запуска CORE OS
+- Не требует запуска Workspace
 
 **Где:** Dev-dependency, вне Level-архитектуры.
 
@@ -1361,12 +1361,12 @@ Error Reporting Engine (Level 1):
 
 ### 4.11 Window Injection & Env Injection
 
-**Window Injection (`window.__CORE_OS__`):**
+**Window Injection (`window.__WORKSPACE__`):**
 - Передача конфигурации в Island Mode (Chromium sandbox) до загрузки страницы
 - Данные: версия CORE, доступные API, тема, локаль
 - Приложение определяет среду выполнения и адаптируется
 
-**Env Injection (`process.env.CORE_OS*`):**
+**Env Injection (`process.env.WORKSPACE*`):**
 - Передача переменных окружения в V8 Isolate
 - `CORE_OS_DB_PATH` — путь к app-scoped SQLite
 - `CORE_OS_VFS_PATH` — путь к app-scoped VFS
@@ -1907,7 +1907,7 @@ Profile Store (SQLite):
 
 **Device key — один на устройство:**
 
-- Генерируется при первом запуске CORE OS. Хранится в TPM/Secure Enclave (или зашифрован в keychain при отсутствии TPM).
+- Генерируется при первом запуске Workspace. Хранится в TPM/Secure Enclave (или зашифрован в keychain при отсутствии TPM).
 - Назначение: WireGuard handshake, device authentication при подключении к Бэку, шифрование profile keys.
 - Не привязан к пользователю. При краже устройства — device key не даёт доступа к данным профилей без дополнительных секретов.
 
@@ -2426,7 +2426,7 @@ Energy Manager (Level 1 + Level 0):
   - `v8_sandbox_test` — тесты на escape из V8 Sandbox
   - `threat_model_check` — автоматическая проверка изменений threat model
 
-**Где:** CI/CD pipeline (вне runtime CORE OS).
+**Где:** CI/CD pipeline (вне runtime Workspace).
 
 ### 10.12 Incident Response
 

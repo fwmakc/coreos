@@ -70,7 +70,7 @@ impl Platform for WindowsPlatform {
             fn resumed(&mut self, event_loop: &ActiveEventLoop) {
                 if self.window.is_none() {
                     let attrs = winit::window::WindowAttributes::default()
-                        .with_title("CORE OS Demo")
+                        .with_title("Workspace Demo")
                         .with_inner_size(winit::dpi::LogicalSize::new(1280, 720));
                     match event_loop.create_window(attrs) {
                         Ok(w) => self.window = Some(w),

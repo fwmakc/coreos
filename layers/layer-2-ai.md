@@ -1,6 +1,6 @@
-# Layer 2 — ИИ-слой и Intent API (Core.Mind)
+﻿# Layer 2 — ИИ-слой и Intent API (Core.Mind)
 
-Как искусственный интеллект работает в CORE OS: от голосового управления и генеративного UI до локального инференса, облачного моста и безопасности AI-операций.
+Как искусственный интеллект работает в Workspace: от голосового управления и генеративного UI до локального инференса, облачного моста и безопасности AI-операций.
 
 ---
 
@@ -362,7 +362,7 @@ mind.on("preActionExecute", (intent) => {
 
 ### Поддерживаемые провайдеры
 
-CORE OS поддерживает любой провайдер с OpenAI-compatible API:
+Workspace поддерживает любой провайдер с OpenAI-compatible API:
 
 - **OpenAI:** ChatGPT, GPT-4o, GPT-4o-mini, o1
 - **Anthropic:** Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
@@ -391,12 +391,12 @@ core-cli ai model pull llama3.1:8b
 core-cli ai model pull phi4:14b
 core-cli ai model pull qwen2.5:7b
 
-# CORE OS автоматически интегрирует Ollama как backend
+# Workspace автоматически интегрирует Ollama как backend
 # Ollama запускается как отдельный процесс (Level 0), общается через localhost API
 ```
 
 - Поддержка GGUF-квантования: Q4_K_M (экономия VRAM), Q5_K_M (баланс), Q8_0 (качество).
-- Автоматическое переключение: если Ollama не запущен, CORE OS стартует его при первом AI-запросе.
+- Автоматическое переключение: если Ollama не запущен, Workspace стартует его при первом AI-запросе.
 
 ### llama.cpp / vLLM (продвинутый способ)
 

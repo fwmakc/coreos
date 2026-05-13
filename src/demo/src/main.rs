@@ -158,7 +158,7 @@ impl DemoApp {
             if let Some(gpu) = &self.gpu {
                 gpu.ctx
                     .window()
-                    .set_title(&format!("CORE OS Demo — {:.0} FPS", fps));
+                    .set_title(&format!("Workspace Demo — {:.0} FPS", fps));
             }
             self.frame_count = 0;
             self.last_frame_time = now;
@@ -188,7 +188,7 @@ impl ApplicationHandler for DemoApp {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         if self.gpu.is_none() {
             let window_attrs = winit::window::WindowAttributes::default()
-                .with_title("CORE OS Demo")
+                .with_title("Workspace Demo")
                 .with_inner_size(PhysicalSize::new(1280, 720));
             let window = match event_loop.create_window(window_attrs) {
                 Ok(w) => w,
@@ -356,7 +356,7 @@ fn render_frame(ctx: &mut GraphicsContext, shapes: &ShapeRenderer, text_renderer
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 
-    info!("CORE OS Phase 0 — Playable Demo starting...");
+    info!("Workspace Phase 0 — Playable Demo starting...");
 
     let event_loop = EventLoop::new().unwrap();
     event_loop.set_control_flow(ControlFlow::Wait);
@@ -364,7 +364,7 @@ fn main() {
     let mut demo = DemoApp::new();
     event_loop.run_app(&mut demo).expect("event loop failed");
 
-    info!("CORE OS Demo exited gracefully");
+    info!("Workspace Demo exited gracefully");
 }
 
 #[cfg(test)]

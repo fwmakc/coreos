@@ -1,6 +1,6 @@
----
+﻿---
 name: Feature request
-about: Suggest an idea for CORE OS
+about: Suggest an idea for Workspace
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''

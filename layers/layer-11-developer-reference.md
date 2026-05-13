@@ -1,6 +1,6 @@
-# Layer 11 — Developer Reference | Справочник разработчика
+﻿# Layer 11 — Developer Reference | Справочник разработчика
 
-> **Назначение:** Единый технический справочник для разработки CORE OS. Содержит все сущности, API, конфигурации, потоки данных, горячие клавиши, системные команды и описание интерфейса.
+> **Назначение:** Единый технический справочник для разработки Workspace. Содержит все сущности, API, конфигурации, потоки данных, горячие клавиши, системные команды и описание интерфейса.
 >
 > **Это слой** — агрегирует данные из layer-1, layer-2, layer-3, layer-6, layer-8 в формате, пригодном для ежедневной работы разработчика.
 
@@ -368,7 +368,7 @@ Intent → Semantic Kernel собирает данные
 
   "network_whitelist": ["string[] (level 3: разрешённые домены. Пустой = доступ запрещён)"],
 
-  "error_reporting_url": "string (URL, куда CORE OS отправляет отчёты об ошибках)"
+  "error_reporting_url": "string (URL, куда Workspace отправляет отчёты об ошибках)"
 }
 ```
 
@@ -376,7 +376,7 @@ Intent → Semantic Kernel собирает данные
 
 | Permission | Что даёт | Уровни | Спрашивает пользователя? |
 |-----------|---------|--------|------------------------|
-| `notifications` | Push-уведомления CORE OS | 2–5 | Да, при первом запуске |
+| `notifications` | Push-уведомления Workspace | 2–5 | Да, при первом запуске |
 | `fullscreen` | Полноэкранный режим | 2–5 | Нет |
 | `fs` | Доступ к файлам через `@core/fs` | 4–5 | Да |
 | `contacts` | Доступ к контактам | 4–5 | Да |
@@ -450,7 +450,7 @@ import { getMetrics } from '@core/performance'
 | Уровень | Как устанавливается |
 |---------|-------------------|
 | 1 | Набрал URL → закрепил. Файлы не скачиваются |
-| 2 | Набрал URL → CORE OS нашёл `core.json` → добавил в каталог |
+| 2 | Набрал URL → Workspace нашёл `core.json` → добавил в каталог |
 | 3–5 | Скачал из каталога / по адресу → код в `installed/` |
 
 **Магазин:** `pkg.core.app` — подпись Ed25519, обновления автоматические.
@@ -600,18 +600,18 @@ core-dev check-updates / update / rollback
 
 - npm-пакет `npm install @core/mock --save-dev`
 - In-memory реализации `@core/*` API
-- Тестирование вне CORE OS (браузер / Node.js)
+- Тестирование вне Workspace (браузер / Node.js)
 - Ограничения: нет CRDT, P2P, WebGPU, реальной безопасности
 
 ### 5.18 Window Injection & Env Injection
 
-**Window Injection (`window.__CORE_OS__`):**
+**Window Injection (`window.__WORKSPACE__`):**
 - Inject-ится в Island Mode до загрузки страницы
 - Поля: `version`, `level`, `appId`, `backend`, `db`, `theme`, `locale`
 
-**Env Injection (`process.env.CORE_OS*`):**
+**Env Injection (`process.env.WORKSPACE*`):**
 - `CORE_OS = 'true'`
-- `CORE_OS_VERSION`, `CORE_OS_LEVEL`, `CORE_OS_APP_ID`
+- `workspace_version`, `CORE_OS_LEVEL`, `CORE_OS_APP_ID`
 - `CORE_OS_DB_PATH` — путь к app-scoped SQLite
 - `CORE_OS_VFS_PATH` — путь к app-scoped VFS
 - `CORE_OS_PROFILE_ID`, `CORE_OS_SPACE_ID`
@@ -1235,7 +1235,7 @@ Panic Gesture ловится на уровне Host Shim (Level 0) — не бл
 │   ├── Список всех действий
 │   └── Запись нового сочетания / жеста
 └── О системе
-    ├── Версия CORE OS
+    ├── Версия Workspace
     ├── Статус синхронизации
     └── Бэкап (восстановление, расписание)
 ```

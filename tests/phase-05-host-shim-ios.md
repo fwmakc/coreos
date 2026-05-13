@@ -1,4 +1,4 @@
-# Тесты: Этап 05 — Host Shim: iOS
+﻿# Тесты: Этап 05 — Host Shim: iOS
 
 > UIKit, lifecycle, touch, gestures, AirPods, APNs, background, Secure Enclave. Все тесты на реальном устройстве (simulator для unit).
 
@@ -129,7 +129,7 @@
 ### TC-05-016: Siri Intent — "Open Core"
 **Тип:** E2E | **Платформа:** iOS | **Данные:** Реальные | **Приоритет:** P1
 **Шаги:**
-1. "Hey Siri, open Core OS".
+1. "Hey Siri, open Workspace".
 **Ожидаемый результат:**
 - CORE запущен.
 **Автоматизация:** ручной.
@@ -161,7 +161,7 @@
 ### TC-05-020: Universal links
 **Тип:** Integration | **Платформа:** iOS | **Данные:** Реальные | **Приоритет:** P1
 **Шаги:**
-1. Открыть `https://coreos.dev/open/project/123`.
+1. Открыть `https://Workspace.dev/open/project/123`.
 **Ожидаемый результат:**
 - CORE открыт. Project 123 загружен.
 **Автоматизация:** ручной.

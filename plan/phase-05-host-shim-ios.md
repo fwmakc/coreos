@@ -1,7 +1,7 @@
-# Этап 5 — Host Shim: iOS
+﻿# Этап 5 — Host Shim: iOS
 
 ## Цель
-Портировать Host Shim на iOS. После завершения этого этапа CORE OS компилируется и запускается на iPhone/iPad как native iOS приложение с полноценным вводом (тач, клавиатура), аудио, хранилищем и сетью.
+Портировать Host Shim на iOS. После завершения этого этапа Workspace компилируется и запускается на iPhone/iPad как native iOS приложение с полноценным вводом (тач, клавиатура), аудио, хранилищем и сетью.
 
 ## Язык и стек
 - **Язык:** Rust
@@ -21,9 +21,9 @@
 
 ### 5.1 Оконная подсистема (UIKit)
 - Реализация `HostBackend` для iOS через `winit` с UIKit бэкендом.
-- **UIViewController:** CORE OS запускается внутри `UIViewController` как full-screen view.
+- **UIViewController:** Workspace запускается внутри `UIViewController` как full-screen view.
 - **Ориентация:** portrait, landscape, auto-rotate. iPad — все ориентации. iPhone — portrait по умолчанию (настраивается).
-- **Multi-window (iPad):** Stage Manager, Split View. CORE OS адаптирует layout при изменении размера окна.
+- **Multi-window (iPad):** Stage Manager, Split View. Workspace адаптирует layout при изменении размера окна.
 - **Safe Area:** учёт safe area (notch, dynamic island, home indicator). Display Server получает safe insets.
 - **Status Bar:** скрыт в полноэкранном режиме CORE, показывается при свайпе сверху (системное поведение iOS).
 
@@ -56,12 +56,12 @@
 - **AirPlay:** поддержка вывода аудио на AirPlay устройства (опционально).
 
 ### 5.6 Хранилище
-- **App Sandbox:** iOS app sandbox. CORE OS хранит данные в `NSDocumentDirectory` (user documents) и `NSApplicationSupportDirectory` (internal data).
+- **App Sandbox:** iOS app sandbox. Workspace хранит данные в `NSDocumentDirectory` (user documents) и `NSApplicationSupportDirectory` (internal data).
 - **iCloud:** интеграция с iCloud Drive для backup (опционально, через `NSFileManager` и `NSUbiquitousKeyValueStore`).
-- **File Provider:** CORE OS может зарегистрировать File Provider extension для доступа к VFS из Files app (опционально, post-release).
+- **File Provider:** Workspace может зарегистрировать File Provider extension для доступа к VFS из Files app (опционально, post-release).
 
 ### 5.7 Сеть
-- **NEPacketTunnelProvider:** для WireGuard VPN. CORE OS регистрирует VPN configuration через `NETunnelProviderManager`.
+- **NEPacketTunnelProvider:** для WireGuard VPN. Workspace регистрирует VPN configuration через `NETunnelProviderManager`.
 - **Background modes:** `voip` background mode для поддержания P2P соединения в фоне.
 - **Low Data Mode:** если включен — P2P sync только по WiFi, не по cellular.
 
@@ -74,7 +74,7 @@
 - **Background fetch:** периодический fetch для P2P sync (ограниченный iOS, ~15 минут интервал).
 
 ### 5.10 App Lifecycle
-- **Background:** при нажатии Home или swipe up — приложение уходит в background. CORE OS сохраняет checkpoint (этап 14) и уменьшает FPS до 0 (pause rendering).
+- **Background:** при нажатии Home или swipe up — приложение уходит в background. Workspace сохраняет checkpoint (этап 14) и уменьшает FPS до 0 (pause rendering).
 - **Foreground:** при возврате — восстановление checkpoint, resume rendering.
 - **Termination:** при убивании системой — graceful shutdown с сохранением данных (через `applicationWillTerminate`).
 - **Memory warning:** при `didReceiveMemoryWarning` — release кэшей, suspend background apps.

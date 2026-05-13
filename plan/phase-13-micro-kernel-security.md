@@ -1,7 +1,7 @@
-# Этап 13 — Micro-Kernel: Security Engine
+﻿# Этап 13 — Micro-Kernel: Security Engine
 
 ## Цель
-Встроить в Micro-Kernel систему безопасности на основе capabilities: каждый API-вызов проверяется на наличие права, приложения работают в sandbox, пользователи имеют роли. После этого этапа CORE OS защищает данные от несанкционированного доступа на уровне ядра.
+Встроить в Micro-Kernel систему безопасности на основе capabilities: каждый API-вызов проверяется на наличие права, приложения работают в sandbox, пользователи имеют роли. После этого этапа Workspace защищает данные от несанкционированного доступа на уровне ядра.
 
 ## Язык и стек
 - **Язык:** TypeScript
@@ -37,7 +37,7 @@
   - Какие `global` объекты доступны (console, fetch — только если `network:http`).
   - Доступ к `process`, `require`, `eval` — запрещён по умолчанию.
   - Таймауты: `setTimeout`/`setInterval` ограничены (max 100 активных таймеров).
-- **Filesystem sandbox:** приложение видит только `CORE_ROOT/apps/<app-id>/` и explicitly granted папки.
+- **Filesystem sandbox:** приложение видит только `WORKSPACE_ROOT/apps/<app-id>/` и explicitly granted папки.
 - **Network sandbox:** приложение может делать HTTP-запросы только к разрешённым доменам (whitelist).
 
 ### 11.4 Permissions UI (подготовка)

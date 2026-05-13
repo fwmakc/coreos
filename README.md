@@ -1,4 +1,4 @@
-# CORE OS — Cross-Platform Overlay Runtime
+﻿# Workspace — Cross-Platform Overlay Runtime
 
 > **Status:** Research & Early Development (Pre-Alpha)  
 > **License:** Apache-2.0  
@@ -8,7 +8,7 @@
 
 ## English
 
-CORE OS is a **host-agnostic overlay runtime** that provides a unified, secure workspace across Windows, macOS, Linux, Android, and iOS. It runs alongside the host operating system, leveraging its hardware drivers while delivering a consistent user experience, offline-first P2P sync, and local AI inference.
+Workspace is a **host-agnostic overlay runtime** that provides a unified, secure workspace across Windows, macOS, Linux, Android, and iOS. It runs alongside the host operating system, leveraging its hardware drivers while delivering a consistent user experience, offline-first P2P sync, and local AI inference.
 
 ### What makes it different
 - **No vendor lock-in:** Your workspace, data, and identity move seamlessly between devices.
@@ -81,7 +81,7 @@ cargo clippy -- -D warnings
 
 ## Русский
 
-CORE OS — это **кросс-платформенный overlay runtime**, который создаёт единое защищённое рабочее пространство поверх Windows, macOS, Linux, Android и iOS. Система использует драйверы хост-ОС, но предоставляет согласованный пользовательский опыт, P2P-синхронизацию в offline-режиме и локальный ИИ-инференс.
+Workspace — это **кросс-платформенный overlay runtime**, который создаёт единое защищённое рабочее пространство поверх Windows, macOS, Linux, Android и iOS. Система использует драйверы хост-ОС, но предоставляет согласованный пользовательский опыт, P2P-синхронизацию в offline-режиме и локальный ИИ-инференс.
 
 ### Ключевые отличия
 - **Независимость от платформы:** Ваше рабочее пространство, данные и идентичность бесшовно перемещаются между устройствами.

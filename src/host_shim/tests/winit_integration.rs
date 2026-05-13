@@ -45,14 +45,14 @@ fn create_window_with_attrs(attrs: WindowAttributes) -> winit::window::Window {
 #[ignore = "requires display server (run with --ignored --test-threads=1)"]
 fn real_window_creation_800x600() {
     let attrs = WindowAttributes::default()
-        .with_title("CORE OS Test")
+        .with_title("Workspace Test")
         .with_inner_size(winit::dpi::LogicalSize::new(800, 600));
     let window = create_window_with_attrs(attrs);
 
     let size = window.inner_size();
     assert_eq!(size.width, 800);
     assert_eq!(size.height, 600);
-    assert_eq!(window.title(), "CORE OS Test");
+    assert_eq!(window.title(), "Workspace Test");
 }
 
 /// TC-01-002: Resize window via winit.

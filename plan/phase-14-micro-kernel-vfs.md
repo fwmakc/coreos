@@ -1,7 +1,7 @@
-# Этап 14 — Micro-Kernel: Virtual File System
+﻿# Этап 14 — Micro-Kernel: Virtual File System
 
 ## Цель
-Создать виртуальную файловую систему CORE OS: единое пространство для всех данных, где файлы адресуются по содержимому (BLAKE3 CID), метаданные хранятся в SQLite (Passport), а тела — в blob-хранилище. После этого этапа CORE OS имеет надёжное, дедуплицированное, версионированное хранилище.
+Создать виртуальную файловую систему Workspace: единое пространство для всех данных, где файлы адресуются по содержимому (BLAKE3 CID), метаданные хранятся в SQLite (Passport), а тела — в blob-хранилище. После этого этапа Workspace имеет надёжное, дедуплицированное, версионированное хранилище.
 
 ## Язык и стек
 - **Язык:** TypeScript
@@ -27,7 +27,7 @@
   - `created_at`, `modified_at` (HLC — Hybrid Logical Clock).
   - `owner_id`, `permissions`.
   - `versions` (JSON-массив: `{ cid, modified_at, author }`).
-- **Body (содержимое):** хранится в `CORE_ROOT/blobs/`. Путь: `blobs/<first-2-hex>/<rest-hex>`.
+- **Body (содержимое):** хранится в `WORKSPACE_ROOT/blobs/`. Путь: `blobs/<first-2-hex>/<rest-hex>`.
 - **Дедупликация:** если два файла имеют одинаковый BLAKE3 — хранится один blob. Passport — две записи, указывающие на один CID.
 
 ### 12.2 Операции VFS
